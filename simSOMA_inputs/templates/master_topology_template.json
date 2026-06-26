@@ -1,0 +1,49 @@
+{
+  "unit": "years",
+  "tree_age": 100.0,
+  "description": "Template topology. Replace branch IDs, ages, lengths, and organ events with the study topology.",
+  "branches": [
+    {
+      "id": "B0_trunk",
+      "parent": null,
+      "length": 100.0,
+      "start_age": 0.0,
+      "end_age": 100.0,
+      "branch_order": 0
+    },
+    {
+      "id": "B1_child",
+      "parent": "B0_trunk",
+      "length": 60.0,
+      "start_age": 40.0,
+      "end_age": 100.0,
+      "branch_order": 1
+    }
+  ],
+  "events": [
+    {
+      "branch": "B0_trunk",
+      "pos": 0.4,
+      "type": "branch",
+      "target": "B1_child",
+      "parent": "B0_trunk",
+      "age": 40.0,
+      "child": "B1_child",
+      "branch_order": 1
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O_trunk_tip",
+      "age": 100.0
+    },
+    {
+      "branch": "B1_child",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O_child_tip",
+      "age": 100.0
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+{
+  "unit": "years",
+  "tree_age": 100.0,
+  "description": "One first-order branch sampled together with the trunk tip.",
+  "branches": [
+    {
+      "id": "B0_trunk",
+      "parent": null,
+      "length": 100.0,
+      "start_age": 0.0,
+      "end_age": 100.0,
+      "branch_order": 0
+    },
+    {
+      "id": "B1_lateral",
+      "parent": "B0_trunk",
+      "length": 70.0,
+      "start_age": 30.0,
+      "end_age": 100.0,
+      "branch_order": 1
+    }
+  ],
+  "events": [
+    {
+      "branch": "B0_trunk",
+      "pos": 0.3,
+      "type": "branch",
+      "target": "B1_lateral",
+      "parent": "B0_trunk",
+      "age": 30.0,
+      "child": "B1_lateral",
+      "branch_order": 1
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O01_trunk_tip",
+      "parent": "B0_trunk",
+      "age": 100.0,
+      "organ": "O01_trunk_tip",
+      "branch_order": 0,
+      "attach_age": 100.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B1_lateral",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O02_lateral_tip",
+      "parent": "B1_lateral",
+      "age": 100.0,
+      "organ": "O02_lateral_tip",
+      "branch_order": 1,
+      "attach_age": 100.0,
+      "terminal_tip": true
+    }
+  ]
+}

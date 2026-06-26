@@ -1,0 +1,71 @@
+{
+  "unit": "years",
+  "coordinate_fields": {
+    "branch_start": "start",
+    "branch_end": "end",
+    "organ_position": "position",
+    "note": "Coordinates are unit-neutral; interpret them according to the topology unit and the simulation config mapping_unit/mapping_rate."
+  },
+  "tree_coordinate_max": 10,
+  "tree_age": 10,
+  "description": "Converted from branch and organ CSV topology files.",
+  "source_files": {
+    "branches_csv": "simSOMA_inputs/examples/example_topology_branches.csv",
+    "organs_csv": "simSOMA_inputs/examples/example_topology_organs.csv"
+  },
+  "branches": [
+    {
+      "id": "B0_trunk",
+      "parent": null,
+      "length": 10,
+      "start": 0,
+      "end": 10,
+      "start_age": 0,
+      "end_age": 10,
+      "branch_order": 0
+    },
+    {
+      "id": "B1_lateral",
+      "parent": "B0_trunk",
+      "length": 5,
+      "start": 5,
+      "end": 10,
+      "start_age": 5,
+      "end_age": 10,
+      "branch_order": 1
+    }
+  ],
+  "events": [
+    {
+      "branch": "B0_trunk",
+      "pos": 0.5,
+      "type": "branch",
+      "target": "B1_lateral",
+      "parent": "B0_trunk",
+      "position": 5,
+      "age": 5,
+      "child": "B1_lateral",
+      "branch_order": 1
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O_trunk_tip",
+      "organ": "O_trunk_tip",
+      "position": 10,
+      "age": 10,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B1_lateral",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O_lateral_tip",
+      "organ": "O_lateral_tip",
+      "position": 10,
+      "age": 10,
+      "terminal_tip": true
+    }
+  ]
+}

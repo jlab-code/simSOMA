@@ -1,0 +1,142 @@
+{
+  "unit": "years",
+  "tree_age": 200.0,
+  "description": "Single-axis 200-year topology with five first-order lateral branches and one terminal sampled organ on each lateral branch. Designed for branch-founder sampling tests.",
+  "branches": [
+    {
+      "id": "B0_trunk",
+      "parent": null,
+      "length": 200.0,
+      "start_age": 0.0,
+      "end_age": 200.0,
+      "branch_order": 0
+    },
+    {
+      "id": "B1_lateral_01",
+      "parent": "B0_trunk",
+      "length": 100.0,
+      "start_age": 100.0,
+      "end_age": 200.0,
+      "branch_order": 1
+    },
+    {
+      "id": "B1_lateral_02",
+      "parent": "B0_trunk",
+      "length": 80.0,
+      "start_age": 120.0,
+      "end_age": 200.0,
+      "branch_order": 1
+    },
+    {
+      "id": "B1_lateral_03",
+      "parent": "B0_trunk",
+      "length": 60.0,
+      "start_age": 140.0,
+      "end_age": 200.0,
+      "branch_order": 1
+    },
+    {
+      "id": "B1_lateral_04",
+      "parent": "B0_trunk",
+      "length": 40.0,
+      "start_age": 160.0,
+      "end_age": 200.0,
+      "branch_order": 1
+    },
+    {
+      "id": "B1_lateral_05",
+      "parent": "B0_trunk",
+      "length": 20.0,
+      "start_age": 180.0,
+      "end_age": 200.0,
+      "branch_order": 1
+    }
+  ],
+  "events": [
+    {
+      "branch": "B0_trunk",
+      "pos": 0.5,
+      "type": "branch",
+      "target": "B1_lateral_01",
+      "parent": "B0_trunk",
+      "age": 100.0,
+      "child": "B1_lateral_01",
+      "branch_order": 1
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.6,
+      "type": "branch",
+      "target": "B1_lateral_02",
+      "parent": "B0_trunk",
+      "age": 120.0,
+      "child": "B1_lateral_02",
+      "branch_order": 1
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.7,
+      "type": "branch",
+      "target": "B1_lateral_03",
+      "parent": "B0_trunk",
+      "age": 140.0,
+      "child": "B1_lateral_03",
+      "branch_order": 1
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.8,
+      "type": "branch",
+      "target": "B1_lateral_04",
+      "parent": "B0_trunk",
+      "age": 160.0,
+      "child": "B1_lateral_04",
+      "branch_order": 1
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.9,
+      "type": "branch",
+      "target": "B1_lateral_05",
+      "parent": "B0_trunk",
+      "age": 180.0,
+      "child": "B1_lateral_05",
+      "branch_order": 1
+    },
+    {
+      "branch": "B1_lateral_01",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O_lateral_01",
+      "age": 200.0
+    },
+    {
+      "branch": "B1_lateral_02",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O_lateral_02",
+      "age": 200.0
+    },
+    {
+      "branch": "B1_lateral_03",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O_lateral_03",
+      "age": 200.0
+    },
+    {
+      "branch": "B1_lateral_04",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O_lateral_04",
+      "age": 200.0
+    },
+    {
+      "branch": "B1_lateral_05",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O_lateral_05",
+      "age": 200.0
+    }
+  ]
+}

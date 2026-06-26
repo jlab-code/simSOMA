@@ -1,0 +1,76 @@
+Bundled simulation design
+=========================
+
+Purpose
+-------
+The bundled configs provide four reusable example simulation grids. Each has a
+rough version for local end-to-end testing and a fine version for cluster-scale
+runs. The rough configs preserve the same parameter ranges as the fine configs
+but use fewer grid points and fewer replicates.
+
+Simulation 01: topology depth / broad interaction grid
+------------------------------------------------------
+Topology:
+  simSOMA_inputs/topologies/topology_01_multibranch_20organs_order1to5.json
+
+Varied parameters:
+  m, rho, branch_precursor_number, organ_precursor_number
+
+Fixed parameters:
+  sam_boundary_cells = 64
+  organ_total_cells = 10000 in fine config
+  seq_fraction = 0.01 in fine config
+
+Simulation 02: rho along a single temporal axis
+-----------------------------------------------
+Topology:
+  simSOMA_inputs/topologies/topology_02_single_axis_20organs_even_spacing.json
+
+Two variants are included:
+  no_phyllotaxy
+  spiral_phyllotaxy
+
+Varied parameters:
+  rho, m
+
+Fixed parameters:
+  sam_boundary_cells = 64
+  branch_precursor_number = 1
+  organ_precursor_number = 8
+  organ_total_cells = 10000 in fine configs
+  seq_fraction = 0.01 in fine configs
+
+Simulation 03: branch-founder sampling
+--------------------------------------
+Topology:
+  simSOMA_inputs/topologies/topology_03_single_axis_5_lateral_branches_terminal_organs.json
+
+Varied parameters:
+  branch_precursor_number, sam_boundary_cells, m
+
+Fixed parameters:
+  rho = 0
+  organ_precursor_number = 1
+  organ_total_cells = 10000 in fine config
+  seq_fraction = 0.01 in fine config
+
+Simulation 04: organ-founder sampling and organ-growth depth
+------------------------------------------------------------
+Topology:
+  simSOMA_inputs/topologies/topology_01_multibranch_20organs_order1to5.json
+
+Varied parameters:
+  organ_precursor_number, organ_total_cells
+
+Fixed parameters:
+  m = 8
+  rho = 0.25
+  sam_boundary_cells = 64
+  branch_precursor_number = 4
+  seq_fraction = 1.0
+
+Notes
+-----
+The fixed values in simulations 02 to 04 are intended to isolate the focal
+parameter class while retaining biologically interpretable background settings.
+They can be changed in derived configs without modifying the simulator code.

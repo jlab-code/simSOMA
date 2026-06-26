@@ -1,0 +1,17 @@
+{
+  "root_id": "B0_trunk",
+  "unit": "years",
+  "n_branches": 2,
+  "n_organs": 2,
+  "n_events": 3,
+  "tree_coordinate_max": 10,
+  "branch_ids": [
+    "B0_trunk",
+    "B1_lateral"
+  ],
+  "organ_ids": [
+    "O_trunk_tip",
+    "O_lateral_tip"
+  ],
+  "validation": "passed"
+}

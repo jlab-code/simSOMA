@@ -1,0 +1,134 @@
+{
+  "run": {
+    "experiment_name": "quick_test_2organs",
+    "outdir_root": "simSOMA_output",
+    "seed": 1
+  },
+  "topology": {
+    "topology_json": "simSOMA_inputs/examples/quick_test_2organs_topology.json",
+    "mapping_unit": "years",
+    "mapping_mode": "deterministic",
+    "mapping_rate": 5.0,
+    "phyllotaxy": {
+      "mode": "off",
+      "divergence_angle_deg": 137.5,
+      "tie_tol": 1e-09
+    }
+  },
+  "check": {
+    "topology_plot": {
+      "enabled": true,
+      "style": "developmental_pruned",
+      "fig_width": 4.2,
+      "fig_height": 2.6,
+      "dpi": 300,
+      "y_ticks": "auto",
+      "tick_size": 8,
+      "label_size": 9,
+      "branch_linewidth": 1.0,
+      "connector_linewidth": 0.8,
+      "branchpoint_size": 9,
+      "organ_size": 16,
+      "tip_size": 6,
+      "min_branch_offset": 0.35,
+      "show_nonterminal_organs": false,
+      "organ_stub_length": 0.28,
+      "nonterminal_organ_style": "dotted",
+      "nonterminal_organ_size": 13,
+      "branch_color_mode": "order",
+      "write_pdf": true,
+      "write_layout_csv": true,
+      "title": "Quick test topology",
+      "y_label": "auto"
+    }
+  },
+  "simulation": {
+    "mode": "grid_parameter",
+    "n_sim": 1,
+    "summaries": true,
+    "vaf_nbins": 20,
+    "summary_private_shared": true,
+    "store_full_results": false,
+    "export_raw_vafs": false,
+    "modules": {
+      "self_renewal": {
+        "m": {
+          "values": [
+            4
+          ]
+        },
+        "rho": {
+          "values": [
+            0.25
+          ]
+        },
+        "mu_year": {
+          "values": [
+            1.0
+          ]
+        },
+        "victim_locality": {
+          "values": [
+            0.0
+          ]
+        },
+        "bias_mode": {
+          "values": [
+            "fixed"
+          ]
+        },
+        "branch_bias_value": {
+          "values": [
+            0.0
+          ]
+        },
+        "branch_bias_mean": {
+          "values": [
+            0.0
+          ]
+        },
+        "branch_bias_kappa": {
+          "values": [
+            1.0
+          ]
+        }
+      },
+      "pre_branching": {
+        "sam_boundary_cells": {
+          "values": [
+            16
+          ]
+        }
+      },
+      "branching": {
+        "branch_precursor_number": {
+          "values": [
+            1
+          ]
+        }
+      },
+      "organ": {
+        "organ_precursor_number": {
+          "values": [
+            1
+          ]
+        },
+        "organ_total_cells": {
+          "values": [
+            64
+          ]
+        },
+        "seq_fraction": {
+          "values": [
+            1.0
+          ]
+        }
+      }
+    },
+    "export_vaf_count_spectra": true,
+    "export_sharing_summaries": true,
+    "export_replicate_sharing_summaries": true,
+    "export_legacy_binned_vaf_summaries": false,
+    "export_legacy_binned_vaf_replicates": false
+  }
+}

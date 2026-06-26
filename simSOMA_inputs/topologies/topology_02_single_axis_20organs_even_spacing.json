@@ -1,0 +1,157 @@
+{
+  "unit": "years",
+  "tree_age": 200.0,
+  "description": "Single-axis 200-year topology with 20 sampled organs placed at equal temporal intervals along the trunk.",
+  "branches": [
+    {
+      "id": "B0_trunk",
+      "parent": null,
+      "length": 200.0,
+      "start_age": 0.0,
+      "end_age": 200.0,
+      "branch_order": 0
+    }
+  ],
+  "events": [
+    {
+      "branch": "B0_trunk",
+      "pos": 0.05,
+      "type": "organ",
+      "target": "O01_axis",
+      "age": 10.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.1,
+      "type": "organ",
+      "target": "O02_axis",
+      "age": 20.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.15,
+      "type": "organ",
+      "target": "O03_axis",
+      "age": 30.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.2,
+      "type": "organ",
+      "target": "O04_axis",
+      "age": 40.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.25,
+      "type": "organ",
+      "target": "O05_axis",
+      "age": 50.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.3,
+      "type": "organ",
+      "target": "O06_axis",
+      "age": 60.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.35,
+      "type": "organ",
+      "target": "O07_axis",
+      "age": 70.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.4,
+      "type": "organ",
+      "target": "O08_axis",
+      "age": 80.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.45,
+      "type": "organ",
+      "target": "O09_axis",
+      "age": 90.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.5,
+      "type": "organ",
+      "target": "O10_axis",
+      "age": 100.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.55,
+      "type": "organ",
+      "target": "O11_axis",
+      "age": 110.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.6,
+      "type": "organ",
+      "target": "O12_axis",
+      "age": 120.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.65,
+      "type": "organ",
+      "target": "O13_axis",
+      "age": 130.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.7,
+      "type": "organ",
+      "target": "O14_axis",
+      "age": 140.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.75,
+      "type": "organ",
+      "target": "O15_axis",
+      "age": 150.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.8,
+      "type": "organ",
+      "target": "O16_axis",
+      "age": 160.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.85,
+      "type": "organ",
+      "target": "O17_axis",
+      "age": 170.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.9,
+      "type": "organ",
+      "target": "O18_axis",
+      "age": 180.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.95,
+      "type": "organ",
+      "target": "O19_axis",
+      "age": 190.0
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O20_axis",
+      "age": 200.0
+    }
+  ]
+}

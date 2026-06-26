@@ -1,0 +1,96 @@
+
+## simSOMA-beta-2026-05-11-streaming-schemafix
+
+- Fixes streaming CSV schema handling for optional columns that can appear after the first row.
+- Predeclares known optional columns such as `sharing_degree`, VAF bin columns, and per-organ private aggregate columns.
+- Preserves bounded-memory streaming output behavior.
+
+# Changelog
+
+## simSOMA-beta-2026-05-10-streaming-outputs
+
+- Reworked `run_from_config.py` grid execution to use bounded-memory output streaming:
+  - each replicate is run as an individual one-replicate `pipeline_wrapper.py` call;
+  - replicate-level CSV rows are written immediately instead of accumulated in Python lists;
+  - temporary one-replicate JSON payloads are deleted immediately when `store_full_results=false`;
+  - aggregate summaries are computed with an online accumulator rather than by retaining all replicate summaries.
+- Added `summaries.SummaryAccumulator`, a streaming equivalent of `aggregate_replicate_summaries()` using population mean/SD updates and sparse zero-filled VAF-spectrum accumulators.
+- Reworked parameter-split merging in `launch_grid_splits.py` to concatenate split CSV/CSV.GZ outputs by streaming file handles instead of materializing all merged rows in memory.
+- Added `output_mode: streaming_bounded_memory` to `grid_parameter/manifest.json`.
+- Retained the existing compact output files and default output profile.
+
+Validation performed in this patch:
+- `python -m py_compile` for `run_from_config.py`, `summaries.py`, and `launch_grid_splits.py`.
+- Tiny single-run check/run completed successfully.
+- Tiny 2-parameter-set, 5-replicate streaming run completed successfully.
+- Tiny 2-split parameter run completed successfully with streaming merge and cleanup.
+- `SummaryAccumulator` was compared against the legacy `aggregate_replicate_summaries()` on one-organ and two-organ test payloads; selected totals, sharing statistics, and VAF count-spectrum row counts matched up to floating-point rounding.
+
+## simSOMA-beta-2026-05-09-compact-defaults
+
+- Changed the default output profile to remove legacy binned VAF-class outputs from routine runs.
+- The default compact outputs now retain:
+  - `sharing_aggregated_summaries.csv`
+  - `vaf_count_spectrum_aggregated_summaries.csv`
+  - `vaf_count_spectrum_replicate_summaries.csv.gz`
+- Legacy binned VAF files are now opt-in only:
+  - `vaf_class_aggregated_summaries.csv` via `export_legacy_binned_vaf_summaries=true`
+  - `vaf_class_replicate_summaries.csv.gz` via `export_legacy_binned_vaf_replicates=true`
+- Split-run merging remains compatible with legacy binned VAF files if they are explicitly enabled or if older split outputs are present.
+- Added explicit config flags for sharing summaries:
+  - `export_sharing_summaries`
+  - `export_replicate_sharing_summaries`
+
+# simSOMA beta changelog
+
+## simSOMA-beta-2026-05-09-vaf-count-spectra
+
+- Added compact allele-count VAF spectrum outputs:
+  - `vaf_count_spectrum_replicate_summaries.csv.gz`
+  - `vaf_count_spectrum_aggregated_summaries.csv`
+- The allele-count spectrum stores `n_sampled_cells`, `allele_count`, and `sampled_vaf`, allowing exact post hoc re-binning without retaining mutation IDs.
+- Spectra are exported for `variant_class = all`, `private`, `shared`, and degree-specific rows with `variant_class = degree`.
+- `sharing_degree` is explicitly defined as the number of sampled organs in which a mutation ID is observed; private means degree 1, shared means degree >= 2.
+- Added `export_vaf_count_spectra` config flag, defaulting to `true`.
+- Updated split-run merging so new feature tables are merged for `SPLIT_AXIS=parameter` and pooled for `SPLIT_AXIS=replicate`.
+- Retained existing binned VAF and sharing summary outputs as convenience summaries.
+
+# Changelog
+
+## simSOMA-beta-2026-05-09-feature-summaries
+
+- Added compact long-format summary outputs for VAF spectra by variant class (`all`, `private`, `shared`).
+- Added compact sharing-count outputs for global private/shared counts, sharing-degree spectra, private counts by organ, and pairwise shared counts.
+- Added config flags `export_summary_feature_tables` and `export_replicate_feature_tables`.
+- Kept raw mutation-level VAF export disabled by default.
+- Added `pandas` to `requirements.txt` for downstream inspection and plotting utilities.
+
+# simSOMA changelog
+
+## simSOMA-beta-2026-05-09-branchbias-selfrenewal
+
+Reference baseline: known-working cluster copy `/home/frank/simSOMA_beta` used for the large simulation run around 2026-03-30.
+
+Changes in this patch:
+
+- Moved branch-specific self-renewal bias parameters to `simulation.modules.self_renewal` in all bundled configs:
+  - `bias_mode`
+  - `branch_bias_value`
+  - `branch_bias_mean`
+  - `branch_bias_kappa`
+- Kept backward compatibility in `run_from_config.py`: older configs that still place these four fields under `simulation.modules.branching` are migrated in memory before validation.
+- Added `VERSION` and `CHANGELOG.md` for explicit version tracking.
+- Added automatic `software_version.json` output at the run directory level. It records the version string and SHA256 checksums of key source files.
+- Updated run instructions and removed stored credentials.
+
+Interface retained from the known-working cluster baseline:
+
+- Organ sampling still uses `seq_fraction` as the user-facing grid parameter.
+- The driver derives `sequenced_cells_used = ceil(seq_fraction * organ_total_cells)`, capped to `[1, organ_total_cells]`.
+- Output tables still use `seq_fraction`, `sequenced_cells_used`, `organ_total_cells`, and `organ_total_cells_realized`.
+
+Mechanistic notes:
+
+- `sam_boundary_cells` sets the exact target number of cells in the amplified SAM peripheral ring before branch/organ founder sampling.
+- `organ_total_cells` sets the exact terminal organ size before observational cell subsampling.
+- These two target cell counts determine the number of local binary-growth divisions required during pre-branching and organ growth, respectively.

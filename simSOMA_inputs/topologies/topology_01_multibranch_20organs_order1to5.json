@@ -1,0 +1,797 @@
+{
+  "unit": "years",
+  "tree_age": 200.0,
+  "description": "Synthetic 200-year, 20-organ branched topology with sampled organs distributed across branch orders 1 to 5.",
+  "branches": [
+    {
+      "id": "B0_trunk",
+      "parent": null,
+      "length": 200.0,
+      "start_age": 0.0,
+      "end_age": 200.0,
+      "branch_order": 0
+    },
+    {
+      "id": "B1_west_old",
+      "parent": "B0_trunk",
+      "length": 176.0,
+      "start_age": 24.0,
+      "end_age": 200.0,
+      "branch_order": 1
+    },
+    {
+      "id": "B1_south_old",
+      "parent": "B0_trunk",
+      "length": 159.0,
+      "start_age": 41.0,
+      "end_age": 200.0,
+      "branch_order": 1
+    },
+    {
+      "id": "B1_east_mid",
+      "parent": "B0_trunk",
+      "length": 137.0,
+      "start_age": 63.0,
+      "end_age": 200.0,
+      "branch_order": 1
+    },
+    {
+      "id": "B1_north_mid",
+      "parent": "B0_trunk",
+      "length": 112.0,
+      "start_age": 88.0,
+      "end_age": 200.0,
+      "branch_order": 1
+    },
+    {
+      "id": "B1_upper_young",
+      "parent": "B0_trunk",
+      "length": 82.0,
+      "start_age": 118.0,
+      "end_age": 200.0,
+      "branch_order": 1
+    },
+    {
+      "id": "B2_west_low",
+      "parent": "B1_west_old",
+      "length": 128.0,
+      "start_age": 72.0,
+      "end_age": 200.0,
+      "branch_order": 2
+    },
+    {
+      "id": "B2_south_low",
+      "parent": "B1_south_old",
+      "length": 114.0,
+      "start_age": 86.0,
+      "end_age": 200.0,
+      "branch_order": 2
+    },
+    {
+      "id": "B2_east_low",
+      "parent": "B1_east_mid",
+      "length": 95.0,
+      "start_age": 105.0,
+      "end_age": 200.0,
+      "branch_order": 2
+    },
+    {
+      "id": "B2_west_high",
+      "parent": "B1_west_old",
+      "length": 89.0,
+      "start_age": 111.0,
+      "end_age": 200.0,
+      "branch_order": 2
+    },
+    {
+      "id": "B2_south_high",
+      "parent": "B1_south_old",
+      "length": 73.0,
+      "start_age": 127.0,
+      "end_age": 200.0,
+      "branch_order": 2
+    },
+    {
+      "id": "B2_north_tip",
+      "parent": "B1_north_mid",
+      "length": 58.0,
+      "start_age": 142.0,
+      "end_age": 200.0,
+      "branch_order": 2
+    },
+    {
+      "id": "B2_east_high",
+      "parent": "B1_east_mid",
+      "length": 54.0,
+      "start_age": 146.0,
+      "end_age": 200.0,
+      "branch_order": 2
+    },
+    {
+      "id": "B3_west_low_a",
+      "parent": "B2_west_low",
+      "length": 82.0,
+      "start_age": 118.0,
+      "end_age": 200.0,
+      "branch_order": 3
+    },
+    {
+      "id": "B3_south_low_a",
+      "parent": "B2_south_low",
+      "length": 67.0,
+      "start_age": 133.0,
+      "end_age": 200.0,
+      "branch_order": 3
+    },
+    {
+      "id": "B3_west_low_b",
+      "parent": "B2_west_low",
+      "length": 49.0,
+      "start_age": 151.0,
+      "end_age": 200.0,
+      "branch_order": 3
+    },
+    {
+      "id": "B3_east_low_a",
+      "parent": "B2_east_low",
+      "length": 47.0,
+      "start_age": 153.0,
+      "end_age": 200.0,
+      "branch_order": 3
+    },
+    {
+      "id": "B3_west_high_a",
+      "parent": "B2_west_high",
+      "length": 44.0,
+      "start_age": 156.0,
+      "end_age": 200.0,
+      "branch_order": 3
+    },
+    {
+      "id": "B3_south_high_a",
+      "parent": "B2_south_high",
+      "length": 34.0,
+      "start_age": 166.0,
+      "end_age": 200.0,
+      "branch_order": 3
+    },
+    {
+      "id": "B4_west_low_a1",
+      "parent": "B3_west_low_a",
+      "length": 46.0,
+      "start_age": 154.0,
+      "end_age": 200.0,
+      "branch_order": 4
+    },
+    {
+      "id": "B4_south_low_a1",
+      "parent": "B3_south_low_a",
+      "length": 38.0,
+      "start_age": 162.0,
+      "end_age": 200.0,
+      "branch_order": 4
+    },
+    {
+      "id": "B4_west_low_a2",
+      "parent": "B3_west_low_a",
+      "length": 26.0,
+      "start_age": 174.0,
+      "end_age": 200.0,
+      "branch_order": 4
+    },
+    {
+      "id": "B4_west_low_b1",
+      "parent": "B3_west_low_b",
+      "length": 21.0,
+      "start_age": 179.0,
+      "end_age": 200.0,
+      "branch_order": 4
+    },
+    {
+      "id": "B4_east_low_a1",
+      "parent": "B3_east_low_a",
+      "length": 19.0,
+      "start_age": 181.0,
+      "end_age": 200.0,
+      "branch_order": 4
+    },
+    {
+      "id": "B4_south_high_a1",
+      "parent": "B3_south_high_a",
+      "length": 16.0,
+      "start_age": 184.0,
+      "end_age": 200.0,
+      "branch_order": 4
+    },
+    {
+      "id": "B5_west_a1_tip",
+      "parent": "B4_west_low_a1",
+      "length": 22.0,
+      "start_age": 178.0,
+      "end_age": 200.0,
+      "branch_order": 5
+    },
+    {
+      "id": "B5_south_a1_tip",
+      "parent": "B4_south_low_a1",
+      "length": 17.0,
+      "start_age": 183.0,
+      "end_age": 200.0,
+      "branch_order": 5
+    },
+    {
+      "id": "B5_west_a2_tip",
+      "parent": "B4_west_low_a2",
+      "length": 12.0,
+      "start_age": 188.0,
+      "end_age": 200.0,
+      "branch_order": 5
+    },
+    {
+      "id": "B5_east_tip",
+      "parent": "B4_east_low_a1",
+      "length": 10.0,
+      "start_age": 190.0,
+      "end_age": 200.0,
+      "branch_order": 5
+    },
+    {
+      "id": "B5_west_b1_tip",
+      "parent": "B4_west_low_b1",
+      "length": 9.0,
+      "start_age": 191.0,
+      "end_age": 200.0,
+      "branch_order": 5
+    },
+    {
+      "id": "B5_south_high_tip",
+      "parent": "B4_south_high_a1",
+      "length": 8.0,
+      "start_age": 192.0,
+      "end_age": 200.0,
+      "branch_order": 5
+    }
+  ],
+  "events": [
+    {
+      "branch": "B0_trunk",
+      "pos": 0.12,
+      "type": "branch",
+      "target": "B1_west_old",
+      "parent": "B0_trunk",
+      "age": 24.0,
+      "child": "B1_west_old",
+      "branch_order": 1
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.205,
+      "type": "branch",
+      "target": "B1_south_old",
+      "parent": "B0_trunk",
+      "age": 41.0,
+      "child": "B1_south_old",
+      "branch_order": 1
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.315,
+      "type": "branch",
+      "target": "B1_east_mid",
+      "parent": "B0_trunk",
+      "age": 63.0,
+      "child": "B1_east_mid",
+      "branch_order": 1
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.44,
+      "type": "branch",
+      "target": "B1_north_mid",
+      "parent": "B0_trunk",
+      "age": 88.0,
+      "child": "B1_north_mid",
+      "branch_order": 1
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 0.59,
+      "type": "branch",
+      "target": "B1_upper_young",
+      "parent": "B0_trunk",
+      "age": 118.0,
+      "child": "B1_upper_young",
+      "branch_order": 1
+    },
+    {
+      "branch": "B1_east_mid",
+      "pos": 0.306569,
+      "type": "branch",
+      "target": "B2_east_low",
+      "parent": "B1_east_mid",
+      "age": 104.999953,
+      "child": "B2_east_low",
+      "branch_order": 2
+    },
+    {
+      "branch": "B1_east_mid",
+      "pos": 0.605839,
+      "type": "branch",
+      "target": "B2_east_high",
+      "parent": "B1_east_mid",
+      "age": 145.999943,
+      "child": "B2_east_high",
+      "branch_order": 2
+    },
+    {
+      "branch": "B1_east_mid",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O03_ord1_3",
+      "parent": "B1_east_mid",
+      "age": 200.0,
+      "organ": "O03_ord1_3",
+      "branch_order": 1,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B1_north_mid",
+      "pos": 0.482143,
+      "type": "branch",
+      "target": "B2_north_tip",
+      "parent": "B1_north_mid",
+      "age": 142.000016,
+      "child": "B2_north_tip",
+      "branch_order": 2
+    },
+    {
+      "branch": "B1_north_mid",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O04_ord1_4",
+      "parent": "B1_north_mid",
+      "age": 200.0,
+      "organ": "O04_ord1_4",
+      "branch_order": 1,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B1_south_old",
+      "pos": 0.283019,
+      "type": "branch",
+      "target": "B2_south_low",
+      "parent": "B1_south_old",
+      "age": 86.000021,
+      "child": "B2_south_low",
+      "branch_order": 2
+    },
+    {
+      "branch": "B1_south_old",
+      "pos": 0.540881,
+      "type": "branch",
+      "target": "B2_south_high",
+      "parent": "B1_south_old",
+      "age": 127.000079,
+      "child": "B2_south_high",
+      "branch_order": 2
+    },
+    {
+      "branch": "B1_south_old",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O02_ord1_2",
+      "parent": "B1_south_old",
+      "age": 200.0,
+      "organ": "O02_ord1_2",
+      "branch_order": 1,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B1_west_old",
+      "pos": 0.272727,
+      "type": "branch",
+      "target": "B2_west_low",
+      "parent": "B1_west_old",
+      "age": 71.999952,
+      "child": "B2_west_low",
+      "branch_order": 2
+    },
+    {
+      "branch": "B1_west_old",
+      "pos": 0.494318,
+      "type": "branch",
+      "target": "B2_west_high",
+      "parent": "B1_west_old",
+      "age": 110.999968,
+      "child": "B2_west_high",
+      "branch_order": 2
+    },
+    {
+      "branch": "B1_west_old",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O01_ord1_1",
+      "parent": "B1_west_old",
+      "age": 200.0,
+      "organ": "O01_ord1_1",
+      "branch_order": 1,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B2_east_high",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O07_ord2_3",
+      "parent": "B2_east_high",
+      "age": 200.0,
+      "organ": "O07_ord2_3",
+      "branch_order": 2,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B2_east_low",
+      "pos": 0.505263,
+      "type": "branch",
+      "target": "B3_east_low_a",
+      "parent": "B2_east_low",
+      "age": 152.999985,
+      "child": "B3_east_low_a",
+      "branch_order": 3
+    },
+    {
+      "branch": "B2_north_tip",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O08_ord2_4",
+      "parent": "B2_north_tip",
+      "age": 200.0,
+      "organ": "O08_ord2_4",
+      "branch_order": 2,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B2_south_high",
+      "pos": 0.534247,
+      "type": "branch",
+      "target": "B3_south_high_a",
+      "parent": "B2_south_high",
+      "age": 166.000031,
+      "child": "B3_south_high_a",
+      "branch_order": 3
+    },
+    {
+      "branch": "B2_south_high",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O06_ord2_2",
+      "parent": "B2_south_high",
+      "age": 200.0,
+      "organ": "O06_ord2_2",
+      "branch_order": 2,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B2_south_low",
+      "pos": 0.412281,
+      "type": "branch",
+      "target": "B3_south_low_a",
+      "parent": "B2_south_low",
+      "age": 133.000034,
+      "child": "B3_south_low_a",
+      "branch_order": 3
+    },
+    {
+      "branch": "B2_west_high",
+      "pos": 0.505618,
+      "type": "branch",
+      "target": "B3_west_high_a",
+      "parent": "B2_west_high",
+      "age": 156.000002,
+      "child": "B3_west_high_a",
+      "branch_order": 3
+    },
+    {
+      "branch": "B2_west_high",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O05_ord2_1",
+      "parent": "B2_west_high",
+      "age": 200.0,
+      "organ": "O05_ord2_1",
+      "branch_order": 2,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B2_west_low",
+      "pos": 0.359375,
+      "type": "branch",
+      "target": "B3_west_low_a",
+      "parent": "B2_west_low",
+      "age": 118.0,
+      "child": "B3_west_low_a",
+      "branch_order": 3
+    },
+    {
+      "branch": "B2_west_low",
+      "pos": 0.617188,
+      "type": "branch",
+      "target": "B3_west_low_b",
+      "parent": "B2_west_low",
+      "age": 151.000064,
+      "child": "B3_west_low_b",
+      "branch_order": 3
+    },
+    {
+      "branch": "B3_east_low_a",
+      "pos": 0.595745,
+      "type": "branch",
+      "target": "B4_east_low_a1",
+      "parent": "B3_east_low_a",
+      "age": 181.000015,
+      "child": "B4_east_low_a1",
+      "branch_order": 4
+    },
+    {
+      "branch": "B3_east_low_a",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O12_ord3_4",
+      "parent": "B3_east_low_a",
+      "age": 200.0,
+      "organ": "O12_ord3_4",
+      "branch_order": 3,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B3_south_high_a",
+      "pos": 0.529412,
+      "type": "branch",
+      "target": "B4_south_high_a1",
+      "parent": "B3_south_high_a",
+      "age": 184.000008,
+      "child": "B4_south_high_a1",
+      "branch_order": 4
+    },
+    {
+      "branch": "B3_south_high_a",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O11_ord3_3",
+      "parent": "B3_south_high_a",
+      "age": 200.0,
+      "organ": "O11_ord3_3",
+      "branch_order": 3,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B3_south_low_a",
+      "pos": 0.432836,
+      "type": "branch",
+      "target": "B4_south_low_a1",
+      "parent": "B3_south_low_a",
+      "age": 162.000012,
+      "child": "B4_south_low_a1",
+      "branch_order": 4
+    },
+    {
+      "branch": "B3_west_high_a",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O10_ord3_2",
+      "parent": "B3_west_high_a",
+      "age": 200.0,
+      "organ": "O10_ord3_2",
+      "branch_order": 3,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B3_west_low_a",
+      "pos": 0.439024,
+      "type": "branch",
+      "target": "B4_west_low_a1",
+      "parent": "B3_west_low_a",
+      "age": 153.999968,
+      "child": "B4_west_low_a1",
+      "branch_order": 4
+    },
+    {
+      "branch": "B3_west_low_a",
+      "pos": 0.682927,
+      "type": "branch",
+      "target": "B4_west_low_a2",
+      "parent": "B3_west_low_a",
+      "age": 174.000014,
+      "child": "B4_west_low_a2",
+      "branch_order": 4
+    },
+    {
+      "branch": "B3_west_low_b",
+      "pos": 0.571429,
+      "type": "branch",
+      "target": "B4_west_low_b1",
+      "parent": "B3_west_low_b",
+      "age": 179.000021,
+      "child": "B4_west_low_b1",
+      "branch_order": 4
+    },
+    {
+      "branch": "B3_west_low_b",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O09_ord3_1",
+      "parent": "B3_west_low_b",
+      "age": 200.0,
+      "organ": "O09_ord3_1",
+      "branch_order": 3,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B4_east_low_a1",
+      "pos": 0.473684,
+      "type": "branch",
+      "target": "B5_east_tip",
+      "parent": "B4_east_low_a1",
+      "age": 189.999996,
+      "child": "B5_east_tip",
+      "branch_order": 5
+    },
+    {
+      "branch": "B4_east_low_a1",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O16_ord4_4",
+      "parent": "B4_east_low_a1",
+      "age": 200.0,
+      "organ": "O16_ord4_4",
+      "branch_order": 4,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B4_south_high_a1",
+      "pos": 0.5,
+      "type": "branch",
+      "target": "B5_south_high_tip",
+      "parent": "B4_south_high_a1",
+      "age": 192.0,
+      "child": "B5_south_high_tip",
+      "branch_order": 5
+    },
+    {
+      "branch": "B4_south_high_a1",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O15_ord4_3",
+      "parent": "B4_south_high_a1",
+      "age": 200.0,
+      "organ": "O15_ord4_3",
+      "branch_order": 4,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B4_south_low_a1",
+      "pos": 0.552632,
+      "type": "branch",
+      "target": "B5_south_a1_tip",
+      "parent": "B4_south_low_a1",
+      "age": 183.000016,
+      "child": "B5_south_a1_tip",
+      "branch_order": 5
+    },
+    {
+      "branch": "B4_west_low_a1",
+      "pos": 0.521739,
+      "type": "branch",
+      "target": "B5_west_a1_tip",
+      "parent": "B4_west_low_a1",
+      "age": 177.999994,
+      "child": "B5_west_a1_tip",
+      "branch_order": 5
+    },
+    {
+      "branch": "B4_west_low_a2",
+      "pos": 0.538462,
+      "type": "branch",
+      "target": "B5_west_a2_tip",
+      "parent": "B4_west_low_a2",
+      "age": 188.000012,
+      "child": "B5_west_a2_tip",
+      "branch_order": 5
+    },
+    {
+      "branch": "B4_west_low_a2",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O13_ord4_1",
+      "parent": "B4_west_low_a2",
+      "age": 200.0,
+      "organ": "O13_ord4_1",
+      "branch_order": 4,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B4_west_low_b1",
+      "pos": 0.571429,
+      "type": "branch",
+      "target": "B5_west_b1_tip",
+      "parent": "B4_west_low_b1",
+      "age": 191.000009,
+      "child": "B5_west_b1_tip",
+      "branch_order": 5
+    },
+    {
+      "branch": "B4_west_low_b1",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O14_ord4_2",
+      "parent": "B4_west_low_b1",
+      "age": 200.0,
+      "organ": "O14_ord4_2",
+      "branch_order": 4,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B5_east_tip",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O20_ord5_4",
+      "parent": "B5_east_tip",
+      "age": 200.0,
+      "organ": "O20_ord5_4",
+      "branch_order": 5,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B5_west_a1_tip",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O17_ord5_1",
+      "parent": "B5_west_a1_tip",
+      "age": 200.0,
+      "organ": "O17_ord5_1",
+      "branch_order": 5,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B5_west_a2_tip",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O18_ord5_2",
+      "parent": "B5_west_a2_tip",
+      "age": 200.0,
+      "organ": "O18_ord5_2",
+      "branch_order": 5,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B5_west_b1_tip",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O19_ord5_3",
+      "parent": "B5_west_b1_tip",
+      "age": 200.0,
+      "organ": "O19_ord5_3",
+      "branch_order": 5,
+      "attach_age": 200.0,
+      "terminal_tip": true
+    }
+  ]
+}

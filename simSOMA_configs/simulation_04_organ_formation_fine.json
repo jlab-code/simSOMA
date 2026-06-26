@@ -1,0 +1,226 @@
+{
+  "run": {
+    "experiment_name": "simulation_04_organ_formation_fine",
+    "outdir_root": "simSOMA_output",
+    "seed": 1
+  },
+  "topology": {
+    "topology_json": "simSOMA_inputs/topologies/topology_01_multibranch_20organs_order1to5.json",
+    "mapping_unit": "years",
+    "mapping_mode": "deterministic",
+    "mapping_rate": 5.0,
+    "phyllotaxy": {
+      "mode": "off",
+      "divergence_angle_deg": 137.5,
+      "tie_tol": 1e-09
+    }
+  },
+  "check": {
+    "topology_plot": {
+      "enabled": true,
+      "style": "developmental_pruned",
+      "fig_width": 4.2,
+      "fig_height": 2.6,
+      "dpi": 300,
+      "y_ticks": "auto",
+      "tick_size": 8,
+      "label_size": 9,
+      "branch_linewidth": 1.0,
+      "connector_linewidth": 0.8,
+      "branchpoint_size": 9,
+      "organ_size": 16,
+      "tip_size": 6,
+      "min_branch_offset": 0.35,
+      "show_nonterminal_organs": false,
+      "organ_stub_length": 0.28,
+      "nonterminal_organ_style": "dotted",
+      "nonterminal_organ_size": 13,
+      "branch_color_mode": "order",
+      "write_pdf": true,
+      "write_layout_csv": true,
+      "title": "Simulation 04 organ formation",
+      "y_label": "auto"
+    }
+  },
+  "simulation": {
+    "mode": "grid_parameter",
+    "n_sim": 50,
+    "summaries": true,
+    "vaf_nbins": 20,
+    "summary_private_shared": true,
+    "store_full_results": false,
+    "export_raw_vafs": false,
+    "modules": {
+      "self_renewal": {
+        "m": {
+          "values": [
+            4
+          ]
+        },
+        "rho": {
+          "values": [
+            0.0
+          ]
+        },
+        "mu_year": {
+          "values": [
+            1.0
+          ]
+        },
+        "victim_locality": {
+          "values": [
+            0.0
+          ]
+        },
+        "bias_mode": {
+          "values": [
+            "fixed"
+          ]
+        },
+        "branch_bias_value": {
+          "values": [
+            0.0
+          ]
+        },
+        "branch_bias_mean": {
+          "values": [
+            0.0
+          ]
+        },
+        "branch_bias_kappa": {
+          "values": [
+            1.0
+          ]
+        }
+      },
+      "pre_branching": {
+        "sam_boundary_cells": {
+          "values": [
+            64
+          ]
+        }
+      },
+      "branching": {
+        "branch_precursor_number": {
+          "values": [
+            4
+          ]
+        }
+      },
+      "organ": {
+        "organ_precursor_number": {
+          "values": [
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            18,
+            19,
+            20,
+            21,
+            22,
+            23,
+            24,
+            25,
+            26,
+            27,
+            28,
+            29,
+            30,
+            31,
+            32,
+            33,
+            34,
+            35,
+            36,
+            37,
+            38,
+            39,
+            40,
+            41,
+            42,
+            43,
+            44,
+            45,
+            46,
+            47,
+            48,
+            49,
+            50,
+            51,
+            52,
+            53,
+            54,
+            55,
+            56,
+            57,
+            58,
+            59,
+            60,
+            61,
+            62,
+            63,
+            64
+          ]
+        },
+        "organ_total_cells": {
+          "values": [
+            64,
+            407,
+            749,
+            1092,
+            1434,
+            1777,
+            2120,
+            2462,
+            2805,
+            3148,
+            3490,
+            3833,
+            4175,
+            4518,
+            4861,
+            5203,
+            5546,
+            5889,
+            6231,
+            6574,
+            6916,
+            7259,
+            7602,
+            7944,
+            8287,
+            8630,
+            8972,
+            9315,
+            9657,
+            10000
+          ]
+        },
+        "seq_fraction": {
+          "values": [
+            1.0
+          ]
+        }
+      }
+    },
+    "export_vaf_count_spectra": true,
+    "export_sharing_summaries": true,
+    "export_replicate_sharing_summaries": true,
+    "export_legacy_binned_vaf_summaries": false,
+    "export_legacy_binned_vaf_replicates": false
+  }
+}

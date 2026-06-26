@@ -1,0 +1,47 @@
+# Python bytecode/cache
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+.env
+
+# Python packaging/build
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Tool/test caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.ipynb_checkpoints/
+
+# simSOMA runtime outputs
+simSOMA_output/
+*_output/
+cluster_run.log
+*.log
+simSOMA_scripts/_run_cluster_inside_tmux.sh
+
+# Generated documentation
+# The full tutorial is maintained externally.
+docs/*.html
+docs/*.pdf
+
+# Local archives
+*.zip
+*.tar.gz
+*.tgz
+
+# OS/editor
+.DS_Store
+.vscode/
+.idea/
+*~

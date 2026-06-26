@@ -1,0 +1,89 @@
+{
+  "unit": "years",
+  "tree_age": 120.0,
+  "description": "Nested topology with branch orders 0, 1, and 2 plus three sampled organs.",
+  "branches": [
+    {
+      "id": "B0_trunk",
+      "parent": null,
+      "length": 120.0,
+      "start_age": 0.0,
+      "end_age": 120.0,
+      "branch_order": 0
+    },
+    {
+      "id": "B1_old",
+      "parent": "B0_trunk",
+      "length": 90.0,
+      "start_age": 30.0,
+      "end_age": 120.0,
+      "branch_order": 1
+    },
+    {
+      "id": "B2_young",
+      "parent": "B1_old",
+      "length": 40.0,
+      "start_age": 80.0,
+      "end_age": 120.0,
+      "branch_order": 2
+    }
+  ],
+  "events": [
+    {
+      "branch": "B0_trunk",
+      "pos": 0.25,
+      "type": "branch",
+      "target": "B1_old",
+      "parent": "B0_trunk",
+      "age": 30.0,
+      "child": "B1_old",
+      "branch_order": 1
+    },
+    {
+      "branch": "B1_old",
+      "pos": 0.555556,
+      "type": "branch",
+      "target": "B2_young",
+      "parent": "B1_old",
+      "age": 80.0,
+      "child": "B2_young",
+      "branch_order": 2
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O01_order0",
+      "parent": "B0_trunk",
+      "age": 120.0,
+      "organ": "O01_order0",
+      "branch_order": 0,
+      "attach_age": 120.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B1_old",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O02_order1",
+      "parent": "B1_old",
+      "age": 120.0,
+      "organ": "O02_order1",
+      "branch_order": 1,
+      "attach_age": 120.0,
+      "terminal_tip": true
+    },
+    {
+      "branch": "B2_young",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O03_order2",
+      "parent": "B2_young",
+      "age": 120.0,
+      "organ": "O03_order2",
+      "branch_order": 2,
+      "attach_age": 120.0,
+      "terminal_tip": true
+    }
+  ]
+}

@@ -1,0 +1,49 @@
+{
+  "unit": "years",
+  "tree_age": 10.0,
+  "description": "Quick smoke-test topology with one trunk, one lateral branch, and two sampled organs. Intended only for fast pipeline testing.",
+  "branches": [
+    {
+      "id": "B0_trunk",
+      "parent": null,
+      "length": 10.0,
+      "start_age": 0.0,
+      "end_age": 10.0,
+      "branch_order": 0
+    },
+    {
+      "id": "B1_lateral",
+      "parent": "B0_trunk",
+      "length": 5.0,
+      "start_age": 5.0,
+      "end_age": 10.0,
+      "branch_order": 1
+    }
+  ],
+  "events": [
+    {
+      "branch": "B0_trunk",
+      "pos": 0.5,
+      "type": "branch",
+      "target": "B1_lateral",
+      "parent": "B0_trunk",
+      "age": 5.0,
+      "child": "B1_lateral",
+      "branch_order": 1
+    },
+    {
+      "branch": "B0_trunk",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O_trunk_tip",
+      "age": 10.0
+    },
+    {
+      "branch": "B1_lateral",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O_lateral_tip",
+      "age": 10.0
+    }
+  ]
+}

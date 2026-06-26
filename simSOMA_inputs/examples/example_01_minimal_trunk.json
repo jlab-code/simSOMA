@@ -1,0 +1,29 @@
+{
+  "unit": "years",
+  "tree_age": 100.0,
+  "description": "Minimal topology: one trunk and one sampled terminal organ.",
+  "branches": [
+    {
+      "id": "B0_trunk",
+      "parent": null,
+      "length": 100.0,
+      "start_age": 0.0,
+      "end_age": 100.0,
+      "branch_order": 0
+    }
+  ],
+  "events": [
+    {
+      "branch": "B0_trunk",
+      "pos": 1.0,
+      "type": "organ",
+      "target": "O01_trunk_tip",
+      "parent": "B0_trunk",
+      "age": 100.0,
+      "organ": "O01_trunk_tip",
+      "branch_order": 0,
+      "attach_age": 100.0,
+      "terminal_tip": true
+    }
+  ]
+}

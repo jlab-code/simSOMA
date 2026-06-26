@@ -1,0 +1,3 @@
+branch_id,parent_id,start,end
+B0_trunk,,0,10
+B1_lateral,B0_trunk,5,10
