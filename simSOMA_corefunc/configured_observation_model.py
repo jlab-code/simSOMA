@@ -18,6 +18,7 @@ runtime metadata such as timestamps.
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 from pathlib import Path
@@ -104,6 +105,15 @@ def normalize_observation_model_config(block: Mapping[str, Any]) -> dict[str, An
         read_cfg.setdefault("sequencing_error", block["sequencing_error"])
     if "caller" in block:
         read_cfg.setdefault("caller", block["caller"])
+    # Ascertainment may be written in any of the public forms below.  The
+    # nested read_counts value remains authoritative when multiple aliases are
+    # present, preserving backward compatibility.
+    if "ascertainment" in block and isinstance(block["ascertainment"], Mapping):
+        ascertainment = dict(block["ascertainment"])
+        if "retain_called_any" in ascertainment:
+            read_cfg.setdefault("retain_called_any", ascertainment["retain_called_any"])
+    if "retain_called_any" in block:
+        read_cfg.setdefault("retain_called_any", block["retain_called_any"])
 
     return {
         "mode": mode,
@@ -333,6 +343,39 @@ def _realized_summary(events: pd.DataFrame) -> dict[str, Any]:
     return out
 
 
+def _observation_contract(cfg: Mapping[str, Any]) -> dict[str, Any]:
+    """Return the canonical generative observation contract used by fitSOMA."""
+    active_layers = [layer for layer in cfg["layers"] if _contribution(cfg, layer) > 0.0]
+    contract: dict[str, Any] = {
+        "schema_version": "1.0",
+        "observation_mode": str(cfg["mode"]),
+        "sampling_modes": [str(cfg["sampling"])],
+        "phase_modes": [str(cfg["phase"])],
+        "layers": [],
+    }
+    for layer in active_layers:
+        if cfg["mode"] == "read_counts":
+            layer_cfg = _read_count_config(cfg, layer)
+            contract["layers"].append({
+                "source_layer": str(layer),
+                "read_model": dict(layer_cfg["read_model"]),
+                "depth_model": dict(layer_cfg["depth_model"]),
+                "caller": dict(layer_cfg["caller"]),
+                "ascertainment": dict(layer_cfg["ascertainment"]),
+            })
+        else:
+            contract["layers"].append({
+                "source_layer": str(layer),
+                "deterministic_depth": int(cfg["deterministic_depth"]),
+            })
+    return contract
+
+
+def _contract_sha256(contract: Mapping[str, Any]) -> str:
+    payload = json.dumps(dict(contract), sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
 def export_fitsoma_handoff(run_dir: Path, scenario_dir: Path, cfg: Mapping[str, Any]) -> dict[str, Any]:
     grid = run_dir / "grid_parameter"
     raw_path = grid / "raw_vafs.csv.gz"
@@ -377,13 +420,17 @@ def export_fitsoma_handoff(run_dir: Path, scenario_dir: Path, cfg: Mapping[str, 
         (rep_dir / "realized_truth.json").write_text(json.dumps(realized, indent=2, sort_keys=True), encoding="utf-8")
         if not er.empty:
             er.to_csv(rep_dir / "realized_event_truth.tsv", sep="\t", index=False)
+        observation_contract = _observation_contract(cfg)
         provenance = {
+            "provenance_schema_version": "1.1",
             "generator": "simSOMA",
             "observation_mode": cfg["mode"],
             "scenario_name": cfg["scenario_name"],
             "observation_seed": obs_seed,
             "complete_mutation_by_sample_matrix": True,
             "ubiquitous_filter_applied": False,
+            "observation_contract": observation_contract,
+            "observation_contract_sha256": _contract_sha256(observation_contract),
             "read_metadata": read_meta,
         }
         (rep_dir / "provenance.json").write_text(json.dumps(provenance, indent=2, sort_keys=True), encoding="utf-8")

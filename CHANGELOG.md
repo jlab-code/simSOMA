@@ -10,6 +10,7 @@
 - Added complete mutation-by-sample fitSOMA handoffs for every parameter set and biological replicate.
 - Added configured and realized truth exports, including founder-sector summaries.
 - Added compact `realized_event_truth.csv.gz` output when required for handoff.
+- Fixed top-level `observation_model.retain_called_any` parsing and added canonical handoff observation-contract provenance.
 - Integrated observation processing with local and split runs; split jobs transform only after merged output is complete.
 - Added deterministic, read-count, and split example configs plus focused tests and documentation.
 

@@ -96,13 +96,18 @@ Example:
     "minimum_depth": 20,
     "minimum_alt_reads": 3,
     "minimum_vaf": 0.02
-  }
+  },
+  "retain_called_any": true
 }
 ```
 
 The current read-count implementation supports fixed or sample-design depth modes,
 binomial or beta-binomial read sampling, and symmetric reference/alternate sequencing
 error. Asymmetric error rates are rejected rather than silently approximated.
+
+`retain_called_any` may be placed directly in `observation_model`, under
+`observation_model.ascertainment`, or in the legacy `observation_model.read_counts`
+block. A nested `read_counts.retain_called_any` value takes precedence when aliases conflict.
 
 ## Output layout
 
@@ -127,7 +132,9 @@ fitSOMA/set_00001/replicate_00000/
 
 `variants.tsv.gz` is a complete mutation-by-sample evidence matrix. simSOMA does not
 apply fitSOMA's confidently-ubiquitous filter. That analysis filter is applied later by
-fitSOMA identically to empirical and simulated input.
+fitSOMA identically to empirical and simulated input. `provenance.json` includes a canonical
+generative observation contract and SHA-256 digest so fitSOMA can verify assay, read, depth,
+caller, ascertainment, sampling, and phasing settings before fitting.
 
 Configured truth records input parameters. Realized truth also records stochastic
 founder-sector outcomes, including `pi_B`, `d_B`, `pi_O`, and `d_O` where available.

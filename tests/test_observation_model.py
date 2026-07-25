@@ -18,7 +18,9 @@ if str(CORE) not in sys.path:
 
 from configured_observation_model import (  # noqa: E402
     _canonical_truth_aliases,
+    _contract_sha256,
     _deterministic_evidence,
+    _observation_contract,
     _read_count_evidence,
     _sample_info,
     normalize_observation_model_config,
@@ -34,6 +36,30 @@ class ObservationConfigTests(unittest.TestCase):
         self.assertEqual(cfg["sampling"], "layer_specific")
         self.assertEqual(cfg["target_layer"], "layer_equivalent")
         self.assertEqual(cfg["phase"], "phased")
+
+
+    def test_top_level_retain_called_any_alias_is_honoured(self) -> None:
+        cfg = normalize_observation_model_config({
+            "mode": "read_counts",
+            "layers": ["L2"],
+            "layer_weights": [1.0],
+            "retain_called_any": False,
+        })
+        self.assertFalse(cfg["read_counts"]["retain_called_any"])
+        contract = _observation_contract(cfg)
+        self.assertFalse(contract["layers"][0]["ascertainment"]["retain_called_any"])
+        self.assertEqual(len(_contract_sha256(contract)), 64)
+
+    def test_nested_retain_called_any_precedence_is_backward_compatible(self) -> None:
+        cfg = normalize_observation_model_config({
+            "mode": "read_counts",
+            "layers": ["L2"],
+            "layer_weights": [1.0],
+            "retain_called_any": False,
+            "ascertainment": {"retain_called_any": False},
+            "read_counts": {"retain_called_any": True},
+        })
+        self.assertTrue(cfg["read_counts"]["retain_called_any"])
 
     def test_invalid_weights_are_rejected(self) -> None:
         with self.assertRaisesRegex(ValueError, "sum to 1.0"):
