@@ -554,8 +554,8 @@ def _cli() -> None:
     p.add_argument(
         "--topology_mapping_mode",
         type=str,
-        default="poisson",
-        choices=["poisson", "deterministic"],
+        default="deterministic",
+        choices=["deterministic"],
         help="How to map observed branch lengths to SR steps.",
     )
     p.add_argument(
@@ -568,10 +568,12 @@ def _cli() -> None:
     p.add_argument("--m", type=int, required=True)
     p.add_argument("--rho", type=float, required=True)
     p.add_argument(
+        "--mu_unit",
         "--mu_year",
+        dest="mu_unit",
         type=str,
         required=True,
-        help="Somatic mutation rate per topology unit (per genome). Can be a comma-separated list for sweeps.",
+        help="Somatic mutation rate per lineage per topology unit (per genome). --mu_year is a deprecated alias. Can be a comma-separated list for sweeps.",
     )
     p.add_argument(
         "--kappa_sr",
@@ -583,7 +585,7 @@ def _cli() -> None:
         "--mu_div",
         type=str,
         default=None,
-        help="Optional mutation rate per division. If provided together with mu_year and kappa_sr, the values must be consistent (mu_div ~= mu_year/kappa_sr). Can be a comma-separated list for sweeps.",
+        help="Optional mutation rate per division. If provided together with mu_unit and kappa_sr, the values must be consistent (mu_div ~= mu_unit/kappa_sr). Can be a comma-separated list for sweeps.",
     )
     p.add_argument("--victim_locality", type=float, default=0.0, help="Victim locality in [0,1]: 0 = uniform across the niche, 1 = nearest-neighbor-only.")
 
@@ -663,10 +665,10 @@ def _cli() -> None:
     if not using_csv and not using_json:
         raise ValueError("You must provide a topology via --topology_json or via --branches_csv/--events_csv.")
 
-    mu_year_list = _parse_float_list(args.mu_year)
+    mu_unit_list = _parse_float_list(args.mu_unit)
     kappa_list = _parse_float_list(args.kappa_sr)
     mu_div_list = _parse_float_list(args.mu_div) if args.mu_div is not None else []
-    grid = list(itertools.product(mu_year_list, kappa_list, (mu_div_list if mu_div_list else [float("nan")]), [None]))
+    grid = list(itertools.product(mu_unit_list, kappa_list, (mu_div_list if mu_div_list else [float("nan")]), [None]))
 
     if int(args.n_sim) < 1:
         raise ValueError("--n_sim must be >= 1")
@@ -674,18 +676,18 @@ def _cli() -> None:
     runs: List[Dict[str, Any]] = []
     base_seed = args.seed
 
-    for idx, (mu_year, kappa_sr, mu_div, _unused) in enumerate(grid):
+    for idx, (mu_unit, kappa_sr, mu_div, _unused) in enumerate(grid):
         if math.isnan(mu_div):
             if kappa_sr <= 0:
                 raise ValueError("kappa_sr must be > 0")
-            mu_div_eff = float(mu_year) / float(kappa_sr)
+            mu_div_eff = float(mu_unit) / float(kappa_sr)
         else:
             mu_div_eff = float(mu_div)
             if mu_div_eff <= 0:
                 raise ValueError("mu_div must be > 0")
-            denom = max(1e-12, abs(mu_div_eff), abs(float(mu_year) / float(kappa_sr)))
-            if abs(mu_div_eff - float(mu_year) / float(kappa_sr)) / denom > 1e-6:
-                raise ValueError("Inconsistent rates: expected mu_div ~= mu_year/kappa_sr")
+            denom = max(1e-12, abs(mu_div_eff), abs(float(mu_unit) / float(kappa_sr)))
+            if abs(mu_div_eff - float(mu_unit) / float(kappa_sr)) / denom > 1e-6:
+                raise ValueError("Inconsistent rates: expected mu_div ~= mu_unit/kappa_sr")
 
         topo_unit = str(args.topology_unit).lower()
         if topo_unit == "auto":
@@ -752,7 +754,8 @@ def _cli() -> None:
                 {
                     "idx": idx,
                     "parameters": {
-                        "mu_year": float(mu_year),
+                        "mu_unit": float(mu_unit),
+                        "mu_year": float(mu_unit),  # deprecated alias
                         "kappa_sr": float(kappa_sr),
                         "mu_div": float(mu_div_eff),
                         "topology_unit": topo_unit,
@@ -770,7 +773,7 @@ def _cli() -> None:
         sr_params = self_renewal.SelfRenewalParams(
             m=int(args.m),
             rho=float(args.rho),
-            mu_year=float(mu_year),
+            mu_unit=float(mu_unit),
             kappa_sr=float(kappa_sr),
             mu_div=float(mu_div_eff),
             victim_locality=float(args.victim_locality),
@@ -833,7 +836,8 @@ def _cli() -> None:
                 "params": {
                     "m": int(args.m),
                     "rho": float(args.rho),
-                    "mu_year": float(mu_year),
+                    "mu_unit": float(mu_unit),
+                    "mu_year": float(mu_unit),  # deprecated alias
                     "kappa_sr": float(kappa_sr),
                     "mu_div": float(mu_div_eff),
                     "victim_locality": float(args.victim_locality),

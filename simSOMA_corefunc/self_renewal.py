@@ -58,10 +58,10 @@ class SelfRenewalParams:
     rho: float
 
     # Mutation and time-mapping parameters (user-facing)
-    mu_year: float        # mutations per topology unit (year or meter)
-    kappa_sr: float       # self-renewal divisions per topology unit
+    mu_unit: Optional[float] = None   # mutations per lineage per topology unit (year, meter, ...)
+    kappa_sr: Optional[float] = None  # self-renewal divisions per topology unit
 
-    # Optional override: if provided, used directly instead of mu_year/kappa_sr
+    # Optional override: if provided, used directly instead of mu_unit/kappa_sr
     mu_div: Optional[float] = None
 
     # Victim selection locality in [0,1]
@@ -73,6 +73,21 @@ class SelfRenewalParams:
     # 0.0 -> neutral displacer choice
     # 1.0 -> only favored-clone cells can displace (if any are present)
     branch_comp_bias: float = 0.0
+
+    # Deprecated alias of mu_unit (historical name; the rate is per topology unit,
+    # not necessarily per year). Accepted as keyword for backward compatibility
+    # (e.g. fitSOMA, simSOMA_extensions); always equal to mu_unit after construction.
+    mu_year: Optional[float] = None
+
+    def __post_init__(self) -> None:
+        mu_unit, mu_year = self.mu_unit, self.mu_year
+        if mu_unit is not None and mu_year is not None and float(mu_unit) != float(mu_year):
+            raise ValueError(f"mu_unit={mu_unit} and its deprecated alias mu_year={mu_year} disagree; give only mu_unit")
+        value = mu_unit if mu_unit is not None else mu_year
+        if value is None and self.mu_div is None:
+            raise ValueError("SelfRenewalParams needs mu_unit (with kappa_sr) or mu_div")
+        object.__setattr__(self, "mu_unit", None if value is None else float(value))
+        object.__setattr__(self, "mu_year", None if value is None else float(value))
 
 
 @dataclass(frozen=True)
@@ -166,9 +181,9 @@ class SelfRenewalSimulator:
     def mu_div(self, params: SelfRenewalParams) -> float:
         if params.mu_div is not None:
             return float(params.mu_div)
-        if params.kappa_sr <= 0:
+        if params.kappa_sr is None or params.kappa_sr <= 0:
             raise ValueError("kappa_sr must be > 0 to derive mu_div")
-        return float(params.mu_year) / float(params.kappa_sr)
+        return float(params.mu_unit) / float(params.kappa_sr)
 
     def _draw_mutation_ids(self, k: int) -> List[int]:
         if k <= 0:
@@ -234,7 +249,11 @@ class SelfRenewalSimulator:
 
                 victim = _choose_victim_site(displacer, m, float(params.victim_locality), self.rng)
 
-                children[victim] = children[displacer]
+                # The displacer divides once more: its second daughter replaces the victim
+                # and receives its own independent mutation draw (as in the amplification
+                # modules). Previously the first daughter was copied, so mutations of that
+                # round started at two niche positions.
+                children[victim] = self.divide(params, parent=state[displacer])
                 events.append(
                     DisplacementEvent(
                         branch_id=str(inputs.branch_id),

@@ -17,6 +17,7 @@ from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
 import summaries
+import topology_io
 
 BIAS_FIELDS = [
     "bias_mode",
@@ -28,7 +29,7 @@ BIAS_FIELDS = [
 CONFIG_PARAMS = [
     "m",
     "rho",
-    "mu_year",
+    "mu_unit",
     "victim_locality",
     *BIAS_FIELDS,
     "sam_boundary_cells",
@@ -42,7 +43,7 @@ SELF_RENEWAL_FIELDS = [
     "m",
     "rho",
     "victim_locality",
-    "mu_year",
+    "mu_unit",
     *BIAS_FIELDS,
 ]
 PRE_BRANCHING_FIELDS = [
@@ -62,7 +63,16 @@ DERIVED_OUTPUT_FIELDS = [
     "organ_total_cells_realized",
     "sequenced_cells_used",
 ]
-OUTPUT_PARAM_FIELDS = SELF_RENEWAL_FIELDS + PRE_BRANCHING_FIELDS + BRANCHING_FIELDS + ORGAN_FIELDS + DERIVED_OUTPUT_FIELDS
+# Deprecated parameter names still written to output tables for downstream compatibility
+# (fitSOMA, existing analysis scripts). Remove in a future major release.
+DEPRECATED_OUTPUT_ALIASES = {
+    "mu_year": "mu_unit",
+}
+# Deprecated config-input names accepted per module section and mapped to canonical names.
+DEPRECATED_INPUT_ALIASES = {
+    "self_renewal": {"mu_year": "mu_unit"},
+}
+OUTPUT_PARAM_FIELDS = SELF_RENEWAL_FIELDS + PRE_BRANCHING_FIELDS + BRANCHING_FIELDS + ORGAN_FIELDS + DERIVED_OUTPUT_FIELDS + list(DEPRECATED_OUTPUT_ALIASES)
 TOPOLOGY_OUTPUT_FIELDS = [
     "mapping_unit",
     "mapping_mode",
@@ -818,6 +828,8 @@ def _params_with_effective_kappa(cfg: Dict[str, Any], params: Dict[str, Any]) ->
     out["organ_precursor_number_realized_cells"] = int(organ_rec["realized_cells"])
     out["organ_total_cells_realized"] = int(n_cells)
     out["sequenced_cells_used"] = int(sequenced_cells)
+    for old, new in DEPRECATED_OUTPUT_ALIASES.items():
+        out[old] = out[new]
     return out
 
 def _resolve_param_spec(spec: Any) -> List[Any]:
@@ -900,6 +912,19 @@ def _normalize_module_param_locations(modules: Dict[str, Any]) -> Dict[str, Any]
         return modules
 
     out = copy.deepcopy(modules)
+    for section, aliases in DEPRECATED_INPUT_ALIASES.items():
+        sec = out.get(section)
+        if not isinstance(sec, dict):
+            continue
+        for old, new in aliases.items():
+            if old not in sec:
+                continue
+            if new in sec and sec[new] != sec[old]:
+                raise ValueError(
+                    f"simulation.modules.{section} has both {new!r} and its deprecated alias {old!r} "
+                    "with different values. Keep only " + repr(new) + "."
+                )
+            sec[new] = sec.pop(old)
     sr = out.get("self_renewal")
     br = out.get("branching")
     if not isinstance(sr, dict) or not isinstance(br, dict):
@@ -1075,8 +1100,10 @@ def _validate_config(cfg: Dict[str, Any]) -> None:
     if mapping_unit not in {"steps", "years", "meters"}:
         raise ValueError("topology.mapping_unit must be one of: steps, years, meters")
 
-    if str(cfg["mapping_mode"]).lower() not in {"deterministic", "poisson"}:
-        raise ValueError("topology.mapping_mode must be one of: deterministic, poisson")
+    try:
+        cfg["mapping_mode"] = topology_io.resolve_mapping_mode(cfg["mapping_mode"])
+    except ValueError as exc:
+        raise ValueError(f"topology.mapping_mode: {exc}") from exc
 
     if mapping_unit != "steps" and cfg.get("mapping_rate") is None:
         raise ValueError(
@@ -1199,7 +1226,7 @@ def _param_id(params: Dict[str, Any]) -> str:
     parts = [
         f"m{_format_label_value(params['m'])}",
         f"rho{_format_label_value(params['rho'])}",
-        f"mu{_format_label_value(params['mu_year'])}",
+        f"mu{_format_label_value(params['mu_unit'])}",
         f"mr{_format_label_value(params['kappa_sr'])}",
         f"vl{_format_label_value(params['victim_locality'])}",
         f"sb{_format_label_value(params['sam_boundary_cells'])}",
@@ -1236,7 +1263,7 @@ def _build_run_command(
         "--topology_mapping_mode", "deterministic",
         "--m", str(params["m"]),
         "--rho", str(params["rho"]),
-        "--mu_year", str(params["mu_year"]),
+        "--mu_unit", str(params["mu_unit"]),
         "--kappa_sr", str(params["kappa_sr"]),
         "--victim_locality", str(params["victim_locality"]),
         "--sam_boundary_cells", str(params["sam_boundary_cells"]),

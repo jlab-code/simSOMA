@@ -36,9 +36,8 @@ integer self-renewal steps via a user-specified rate.
 We store times in the JSON under the same keys (T, time) and overwrite them with integer
 self-renewal steps after mapping. The original observed branch length is retained as T_obs.
 
-Mapping methods:
+Mapping method (deterministic only; stochastic Poisson mapping was removed in 0.2.0):
 - deterministic: T_steps = round(rate * T_obs)
-- poisson:       T_steps ~ Poisson(rate * T_obs)
 
 Event times are mapped by preserving within-branch position:
 time_frac = time_obs / T_obs, then time_steps = round(time_frac * T_steps).
@@ -328,7 +327,7 @@ def load_topology_auto(
                 topo,
                 unit=str(mapping.get("unit", "steps")),
                 rate=float(mapping.get("rate")),
-                mode=str(mapping.get("mode", "poisson")),
+                mode=str(mapping.get("mode", "deterministic")),
                 seed=seed,
                 keep_observed=True,
             )
@@ -346,7 +345,7 @@ def load_topology_auto(
                 topo_obs,
                 unit=str(mapping.get("unit", unit)),
                 rate=float(mapping.get("rate")),
-                mode=str(mapping.get("mode","poisson")),
+                mode=str(mapping.get("mode", "deterministic")),
                 seed=seed,
                 keep_observed=True,
             )
@@ -366,12 +365,33 @@ def _clamp_int(x: int, lo: int, hi: int) -> int:
     return max(lo, min(hi, int(x)))
 
 
+MAPPING_MODES = ("deterministic",)
+
+
+def resolve_mapping_mode(mode: Optional[str]) -> str:
+    """Validate a topology mapping mode.
+
+    Only deterministic mapping is supported. Stochastic (Poisson) mapping was removed in
+    simSOMA 0.2.0: it was realised once per run (not per replicate) and the previous
+    implementation saturated at ~745 self-renewal steps per branch.
+    """
+    m = "deterministic" if mode is None else str(mode).strip().lower()
+    if m == "poisson":
+        raise ValueError(
+            "Topology mapping mode 'poisson' was removed in simSOMA 0.2.0. "
+            "Use mapping mode 'deterministic' (T_steps = round(rate * T_obs))."
+        )
+    if m not in MAPPING_MODES:
+        raise ValueError(f"Unknown topology mapping mode {mode!r}; allowed: {list(MAPPING_MODES)}")
+    return m
+
+
 def map_topology_to_sr_steps(
     topo: Topology,
     *,
     unit: str,
     rate: float,
-    mode: str = "poisson",
+    mode: str = "deterministic",
     seed: Optional[int] = None,
     keep_observed: bool = True,
 ) -> Topology:
@@ -384,17 +404,18 @@ def map_topology_to_sr_steps(
     rate:
         Turnover rate: events per year (if unit="years") or events per meter (if unit="meters").
     mode:
-        "poisson" (default) or "deterministic".
+        "deterministic" (only supported mode; see resolve_mapping_mode).
+    seed:
+        Ignored; retained for interface compatibility.
 
     Semantics
     ---------
     - Input topology must have per-branch numeric `T` and per-event numeric `time` in the *observed* unit.
     - Output topology has integer `T` and integer event `time` measured in self-renewal steps.
-    - Event times are mapped by *fractional position* along the branch to preserve ordering under
-      stochastic branch-length sampling.
+    - Event times are mapped by *fractional position* along the branch.
     """
     unit = str(unit).lower()
-    mode = str(mode).lower()
+    mode = resolve_mapping_mode(mode)
 
     if unit == "steps":
         return topo
@@ -402,35 +423,15 @@ def map_topology_to_sr_steps(
         raise ValueError("unit must be one of: steps, years, meters")
     if rate <= 0:
         raise ValueError("rate must be > 0")
-    if mode not in {"poisson", "deterministic"}:
-        raise ValueError("mode must be one of: poisson, deterministic")
-
-    rng = random.Random(seed)
-
     out: Topology = {"root_id": topo["root_id"], "branches": {}}
-    out["mapping"] = {"unit": unit, "rate": float(rate), "mode": mode, "seed": seed}
+    out["mapping"] = {"unit": unit, "rate": float(rate), "mode": mode}
 
     for bid, b in topo["branches"].items():
         T_obs = float(b["T"])
         if T_obs < 0:
             raise ValueError(f"Branch {bid} has negative T")
 
-        mean_steps = float(rate) * T_obs
-        if mode == "deterministic":
-            T_steps = int(round(mean_steps))
-        else:
-            # Poisson via Knuth's algorithm (numpy-free).
-            # This is fine for moderate means typical of branch mapping.
-            L = math.exp(-mean_steps)
-            k = 0
-            p = 1.0
-            while p > L:
-                k += 1
-                p *= rng.random()
-            T_steps = k - 1
-
-        if T_steps < 0:
-            T_steps = 0
+        T_steps = max(0, int(round(float(rate) * T_obs)))
 
         b_out: Dict[str, Any] = {"parent_id": b.get("parent_id"), "T": int(T_steps), "events": []}
         if keep_observed:
@@ -521,7 +522,7 @@ def read_topology_csv(
             topo,
             unit=unit0,
             rate=float(mapping.get("rate")),
-            mode=str(mapping.get("mode", "poisson")),
+            mode=str(mapping.get("mode", "deterministic")),
             seed=seed,
             keep_observed=True,
         )
@@ -559,7 +560,7 @@ def load_topology_json(
             topo,
             unit=str(mapping.get("unit", "steps")),
             rate=float(mapping.get("rate")),
-            mode=str(mapping.get("mode", "poisson")),
+            mode=str(mapping.get("mode", "deterministic")),
             seed=seed,
             keep_observed=True,
         )
@@ -598,7 +599,7 @@ def _cli() -> None:
     p.add_argument("--out_json", type=Path, required=True)
     p.add_argument("--topology_unit", type=str, default="steps", choices=["steps", "years", "meters"], help="Unit of T and event times in CSV.")
     p.add_argument("--rate", type=float, default=None, help="Turnover rate (events/year or events/meter). Required if topology_unit != steps.")
-    p.add_argument("--mapping_mode", type=str, default="poisson", choices=["poisson", "deterministic"], help="How to map observed branch lengths to SR steps.")
+    p.add_argument("--mapping_mode", type=str, default="deterministic", choices=["deterministic"], help="How to map observed branch lengths to SR steps (deterministic only).")
     p.add_argument("--seed", type=int, default=None)
     args = p.parse_args()
 

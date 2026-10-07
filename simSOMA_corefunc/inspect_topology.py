@@ -60,7 +60,7 @@ def main() -> None:
     mapg = p.add_argument_group("Mapping (observed units -> SR steps)")
     mapg.add_argument("--topology_unit", type=str, default="steps", choices=["steps", "years", "meters"], help="Unit in the input topology. If years/meters, mapping is applied using --kappa_sr.")
     mapg.add_argument("--kappa_sr", type=float, default=None, help="SR divisions per topology unit used for mapping.")
-    mapg.add_argument("--topology_mapping_mode", type=str, default="poisson", choices=["poisson", "deterministic"], help="Mapping mode for branch lengths")
+    mapg.add_argument("--topology_mapping_mode", type=str, default="deterministic", choices=["deterministic"], help="Mapping mode for branch lengths (deterministic only)")
     mapg.add_argument("--mapping_seed", type=int, default=123, help="Seed for stochastic mapping (Poisson).")
 
     out = p.add_argument_group("Output")

@@ -1,5 +1,31 @@
 # Changelog
 
+## Unreleased (0.2.0-dev) — revision code fixes (branch `revision/code-fixes`)
+
+Fixes agreed 2026-10-07 during the manuscript revision. Paper-relevant notes in brackets.
+
+- **Removed stochastic (Poisson) topology mapping.** Only `mapping_mode: deterministic`
+  (`T_steps = round(kappa_sr * L)`) is supported; `poisson` now fails with a clear error.
+  The removed sampler (Knuth algorithm) saturated at ~745 steps per branch because
+  `exp(-mean)` underflows, and it was drawn once per run (topology-check step, fixed seed)
+  rather than per replicate. [Paper runs used deterministic mapping: results unaffected.
+  SI Sec. 2.5 and Appendix Table 1 (`mapping mode`) and the tutorial must drop the Poisson option.]
+- **Displacement now uses an independent daughter.** In a displacement event the displacer
+  divides once more and its second daughter, with its own Poisson mutation draw, replaces the
+  victim. Previously the displacer's first daughter was copied, so mutations of that round
+  started at two niche positions; this was inconsistent with the amplification modules.
+  Changes outputs for rho > 0 (RNG stream). Check on topology 02 (m in {2,4}, rho in
+  {0.1,0.5,1}, 40 reps): fixed/intermediate/private fractions changed by < 0.005, within
+  Monte-Carlo error. [SI Sec. 4.5 wording to update.]
+- **Naming.** `mu_unit` is the canonical name of the mutation rate per lineage per topology
+  unit (config `simulation.modules.self_renewal.mu_unit`, `SelfRenewalParams.mu_unit`,
+  worker `--mu_unit`). `mu_year` remains a deprecated alias everywhere (input) and is still
+  written as an extra output column. Realized/configured truth exports `P_b_eff` (branch
+  precursor number realized in the child niche); `P_a_eff` is still written as a deprecated
+  alias for fitSOMA <= 0.3.19. Example configs updated to `mu_unit`.
+- Tests: `tests/test_code_fixes.py` (mapping, displacement, aliases). Checked compatible with
+  fitSOMA 0.3.19.1 (`validate_simsoma` -> compatible; adapter simulation runs).
+
 ## Unreleased — config-driven observation model and fitSOMA handoff
 
 - Added an optional top-level `observation_model` block to the ordinary simSOMA config.

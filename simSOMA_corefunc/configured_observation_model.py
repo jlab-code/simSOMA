@@ -288,17 +288,20 @@ def _jsonable(value: Any) -> Any:
 
 def _canonical_truth_aliases(configured: Mapping[str, Any], run_config: Mapping[str, Any], obs_cfg: Mapping[str, Any]) -> dict[str, Any]:
     out: dict[str, Any] = {}
-    if configured.get("mu_year") is not None:
-        out["mu_unit"] = float(configured["mu_year"])
+    mu = configured.get("mu_unit", configured.get("mu_year"))
+    if mu is not None:
+        out["mu_unit"] = float(mu)
     k = float(configured.get("effective_kappa_sr", configured.get("mapping_rate", 1.0)))
     out["kappa_sr"] = k
     out["K_sr"] = k
     if configured.get("sam_boundary_cells") is not None:
         out["C"] = int(float(configured["sam_boundary_cells"]))
     if configured.get("branch_precursor_number_realized_cells") is not None:
-        out["P_a_eff"] = int(float(configured["branch_precursor_number_realized_cells"]))
+        out["P_b_eff"] = int(float(configured["branch_precursor_number_realized_cells"]))
     elif configured.get("branch_precursor_number") is not None:
-        out["P_a_eff"] = min(int(float(configured["branch_precursor_number"])), int(float(configured.get("m", 1))))
+        out["P_b_eff"] = min(int(float(configured["branch_precursor_number"])), int(float(configured.get("m", 1))))
+    if "P_b_eff" in out:
+        out["P_a_eff"] = out["P_b_eff"]  # deprecated alias (fitSOMA <= 0.3.19); remove later
     if configured.get("organ_precursor_number_realized_cells") is not None:
         out["P_o"] = int(float(configured["organ_precursor_number_realized_cells"]))
     elif configured.get("organ_precursor_number") is not None:
