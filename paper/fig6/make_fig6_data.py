@@ -5,7 +5,7 @@ One set of simulated trees (SI topology 01, 20 organs), three SAM layers simulat
   level 1  layer-specific, phased      : v = f                      (developmental VAF, L2)
   level 2  layer-specific, unphased    : v = f / 2
   level 3  bulk, unphased (exact)      : v = c_k f / 2              (c = 0.10, 0.70, 0.20)
-  level 4  + reads                     : depth ~ log-normal site x sample model (mean 60), binomial reads,
+  level 4  + reads                     : depth ~ log-normal site x organ x organ-factor model (plantsoma_obs 1.1.0, mean 60), binomial reads,
                                          called if >= 2 alt reads in >= 1 organ
   level 5  + background artefacts      : 2000 sites, VAF ~ gamma(shape 2, mean 0.023), same in all organs
 Depth series: level 4 at mean depth 20, 60, 150.

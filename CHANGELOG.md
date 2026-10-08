@@ -33,17 +33,19 @@ Fixes agreed 2026-10-07 during the manuscript revision. Paper-relevant notes in 
   Field names consumed by fitSOMA are unchanged, so fitSOMA's pi_B, d_B, pi_O, d_O now follow the
   corrected definition (checked: fitSOMA targets give pi_O = 0.443 at rho = 0 and 0.5, exact 0.438).
   [Manuscript figures unaffected: none use founder/lineage statistics.]
-- **Shared observation model `plantsoma_obs` (1.0.0).** Depth / read / error / caller /
+- **Shared observation model `plantsoma_obs` (1.1.0).** Depth / read / error / caller /
   ascertainment steps of the mutation-level transform now call one versioned implementation,
-  merged with the vafSOMA benchmark generator v3 (log-normal site x sample depth, background
-  artefact sites, depth tiers, all-sample site filter). Existing configurations are numerically
+  merged with the vafSOMA benchmark generator v4 (simSOMA_extensions v4; v3 withdrawn): read depth
+  Poisson(D g_i e_is h_s) with log-normal site / site-by-sample / sample factors (sdlog 0.58 / 0.17 /
+  0.27) fitted to apricot fruit pseudobulk input tables (Goel et al. 2024), background artefact
+  sites, depth tiers as nested filters of one read set, all-sample site filter. Existing configurations are numerically
   identical (tested against the previous implementation). Outputs record model version and a
   settings digest.
 - **Per-layer simulation (`layered.py`, `simsoma layers`).** Independent L1/L2/L3 lineage
   histories on one topology (own seed and mu_unit per layer; shared developmental parameters and
   phyllotactic event positions), bulk combination with global or per-organ layer contributions,
-  read-level observation, vafSOMA-format depth-tier tables. Statistically matches the
-  simSOMA_extensions v3 generator (sites per tier, depth quantiles, mutations per layer).
+  read-level observation, vafSOMA-format depth-tier tables. Follows the conventions of the
+  simSOMA_extensions v4 generator (depth draws identical for the same seed; tested).
 - **Organ mutation-rate multiplier** `organ_mu_multiplier` (optional organ-module parameter,
   default 1): scales the per-division rate during organ amplification only. Historical set
   labels unchanged when 1.

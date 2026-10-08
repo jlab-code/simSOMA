@@ -39,15 +39,26 @@ class ObservationModelTests(unittest.TestCase):
         ref = np.column_stack([np.maximum(np.rint(rng.normal(80, 10, 50)).astype(int), 1) for _ in range(3)])
         self.assertTrue((d == ref).all())
 
-    def test_lognormal_depth_v3(self):
+    def test_lognormal_depth_v4(self):
         cfg = plantsoma_obs.normalize_config({"depth": {"mode": "lognormal_site_sample", "mean": 60}})
+        self.assertEqual((cfg["depth"]["site_sdlog"], cfg["depth"]["sample_sdlog"], cfg["depth"]["sample_factor_sdlog"]),
+                         (0.58, 0.17, 0.27))
         d = plantsoma_obs.draw_depths(20000, 14, cfg["depth"], np.random.default_rng(1))
         # site factor truncated at 3: E[g | g <= 3] = Phi(z - s) / Phi(z), z = (ln 3 + s^2/2) / s
         from statistics import NormalDist
         s = 0.58; z = (np.log(3) + s * s / 2) / s
-        self.assertAlmostEqual(d.mean() / 60, NormalDist().cdf(z - s) / NormalDist().cdf(z), delta=0.015)
-        site_cv = (d.mean(axis=1).std() / d.mean())
-        self.assertAlmostEqual(site_cv, 0.55, delta=0.08)   # log-sd 0.58 plus Poisson/sample noise
+        # sample factor h (sdlog 0.27, 14 samples) adds noise to the overall mean
+        self.assertAlmostEqual(d.mean() / 60, NormalDist().cdf(z - s) / NormalDist().cdf(z), delta=0.12)
+        # organ factor: log of per-sample mean depths has sd ~ 0.27
+        self.assertAlmostEqual(np.log(d.mean(axis=0)).std(ddof=1), 0.27, delta=0.09)
+        # matches the v4 generator draw order g, e, h exactly
+        rng = np.random.default_rng(7); S, O = 500, 6
+        g = np.exp(rng.normal(-0.58 ** 2 / 2, 0.58, 4 * S)); g = g[g <= 3][:S]
+        e = np.exp(rng.normal(-0.17 ** 2 / 2, 0.17, (S, O)))
+        h = np.exp(rng.normal(-0.27 ** 2 / 2, 0.27, O))
+        ref = rng.poisson(60 * g[:, None] * e * h[None, :])
+        cfg0 = plantsoma_obs.normalize_config({"depth": {"mode": "lognormal_site_sample", "mean": 60, "minimum": 0}})
+        self.assertTrue((plantsoma_obs.draw_depths(S, O, cfg0["depth"], np.random.default_rng(7)) == ref).all())
 
     def test_background_and_ascertainment(self):
         cfg = {"background": {"n_sites": 500, "distribution": "gamma:2", "mean": 0.023},

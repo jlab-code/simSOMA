@@ -243,7 +243,7 @@ def _read_count_config(cfg: Mapping[str, Any], layer: str) -> dict[str, Any]:
         "default_sd": sd,
         "minimum": int(depth.get("minimum", 1)),
     }
-    for k in ("site_sdlog", "sample_sdlog", "max_site_factor"):
+    for k in ("site_sdlog", "sample_sdlog", "sample_factor_sdlog", "max_site_factor"):
         if k in depth:
             depth_model[k] = float(depth[k])
     out = {

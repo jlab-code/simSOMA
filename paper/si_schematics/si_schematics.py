@@ -159,8 +159,8 @@ def fig_observation():
     boxes = [
         ("Developmental VAF\n$v^{(k)}_{io}$", "per layer k\n(independent lineage\nhistories, one topology)"),
         ("Assay VAF\n$\\tilde v_{io}=\\eta\\sum_k a_{ko} v^{(k)}_{io}$", "layer contributions $a_{ko}$\nphasing $\\eta\\in\\{1,1/2\\}$"),
-        ("Read depth\n$D_{is}$", "fixed | normal | Poisson |\nlog-normal site x sample"),
-        ("Variant reads\n$A_{is}\\sim\\mathrm{Bin}(D_{is},p_{is})$", "$p=\\tilde v(1-e)+(1-\\tilde v)e$\n(or beta-binomial)\n+ background sites"),
+        ("Read depth\n$D_{io}$", "fixed | normal | Poisson |\nlog-normal site, site-by-organ\nand organ factors (apricot)"),
+        ("Variant reads\n$A_{io}\\sim\\mathrm{Bin}(D_{io},p_{io})$", "$p=\\tilde v(1-e)+(1-\\tilde v)e$\n(or beta-binomial)\n+ background sites"),
         ("Calls / ascertainment", "min depth, min alt reads,\nmin VAF; keep sites called\nin >= 1 sample"),
     ]
     xs = np.linspace(1.5, 13.5, len(boxes))

@@ -2,7 +2,7 @@
 
 vafSOMA reads one VAF table per depth cutoff ("tier"). In real data the tiers are filters of
 the same reads, and a site enters a tier only if every sample reaches the cutoff. This module
-reproduces that layout from an observe() result (generator v3 conventions).
+reproduces that layout from an observe() result (benchmark generator v4 conventions).
 """
 from __future__ import annotations
 

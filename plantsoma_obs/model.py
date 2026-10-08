@@ -31,7 +31,7 @@ from typing import Any, Mapping, Optional, Sequence
 
 import numpy as np
 
-OBSERVATION_MODEL_VERSION = "1.0.0"
+OBSERVATION_MODEL_VERSION = "1.1.0"
 
 DEFAULTS: dict[str, Any] = {
     "depth": {
@@ -39,8 +39,9 @@ DEFAULTS: dict[str, Any] = {
         "mean": 100.0,
         "sd": 15.0,
         "minimum": 1,
-        "site_sdlog": 0.58,
-        "sample_sdlog": 0.235,
+        "site_sdlog": 0.58,            # site factor g_i
+        "sample_sdlog": 0.17,          # site-by-sample factor e_is
+        "sample_factor_sdlog": 0.27,   # sample (organ / library) factor h_s
         "max_site_factor": 3.0,
     },
     "reads": {
@@ -93,7 +94,8 @@ def normalize_config(config: Optional[Mapping[str, Any]] = None) -> dict[str, An
         raise ValueError(f"depth.mode must be one of {list(DEPTH_MODES)}, got {d['mode']!r}")
     if float(d["mean"]) <= 0 or float(d["sd"]) < 0 or int(d["minimum"]) < 0:
         raise ValueError("depth.mean must be > 0, depth.sd >= 0, depth.minimum >= 0")
-    if float(d["max_site_factor"]) <= 0 or float(d["site_sdlog"]) < 0 or float(d["sample_sdlog"]) < 0:
+    if float(d["max_site_factor"]) <= 0 or min(float(d["site_sdlog"]), float(d["sample_sdlog"]),
+                                               float(d["sample_factor_sdlog"])) < 0:
         raise ValueError("depth.max_site_factor must be > 0 and sdlog values >= 0")
     r = cfg["reads"]
     if r["type"] not in READ_TYPES:
@@ -150,7 +152,10 @@ def draw_depths(n_sites: int, n_samples: int, depth_cfg: Mapping[str, Any], rng:
     sds = _per_sample(sample_sds, float(d["sd"]), n_samples)
     minimum = int(d["minimum"])
     if mode == "lognormal_site_sample":
+        # D_is ~ Poisson(mean_s * g_i * e_is * h_s); log-normal factors with mean 1; sites with g_i > cap
+        # removed (max-depth filter). Draw order g, e, h as in the vafSOMA benchmark generator v4.
         sg, se, cap = float(d["site_sdlog"]), float(d["sample_sdlog"]), float(d["max_site_factor"])
+        so = float(d["sample_factor_sdlog"])
         g = np.empty(n_sites)
         filled = 0
         while filled < n_sites:                       # truncation by resampling (max-depth filter)
@@ -159,7 +164,8 @@ def draw_depths(n_sites: int, n_samples: int, depth_cfg: Mapping[str, Any], rng:
             g[filled:filled + len(x)] = x
             filled += len(x)
         e = np.exp(rng.normal(-se ** 2 / 2, se, (n_sites, n_samples)))
-        out = rng.poisson(means[None, :] * g[:, None] * e)
+        h = np.exp(rng.normal(-so ** 2 / 2, so, n_samples)) if so > 0 else np.ones(n_samples)
+        out = rng.poisson(means[None, :] * g[:, None] * e * h[None, :])
         return np.maximum(out, minimum).astype(int)
     out = np.empty((n_sites, n_samples), dtype=int)
     for s in range(n_samples):                         # column order kept for backward compatibility

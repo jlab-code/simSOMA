@@ -813,7 +813,7 @@ def _plantsoma_obs_config(cfg: Mapping[str, Any]) -> dict[str, Any]:
     depth = {"mode": str(dm.get("mode", "sample_design")),
              "mean": float(dm.get("default_mean", 100.0)), "sd": float(dm.get("default_sd", 15.0)),
              "minimum": int(dm.get("minimum", 1))}
-    for k in ("site_sdlog", "sample_sdlog", "max_site_factor"):
+    for k in ("site_sdlog", "sample_sdlog", "sample_factor_sdlog", "max_site_factor"):
         if k in dm:
             depth[k] = float(dm[k])
     out = {
