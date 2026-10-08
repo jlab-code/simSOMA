@@ -1,4 +1,4 @@
-"""Draft data panels for the revised Fig. 6 (schematic panel A stays hand-drawn).
+"""Data panels C-I of the revised Fig. 6 (panels A-B: original schematic).
 Usage: python3 paper/fig6/plot_fig6_draft.py DATA_DIR OUT.png"""
 import glob, sys
 from pathlib import Path
@@ -13,9 +13,9 @@ plt.rcParams.update({"font.size": 8, "axes.spines.top": False, "axes.spines.righ
                      "xtick.color": INK2, "ytick.color": INK2, "axes.labelcolor": INK})
 v = pd.read_csv(data / "vaf_levels.csv.gz")
 reps = v.rep.nunique()
-panels = [("1_layer_phased", "B  Layer-specific, phased"), ("2_layer_unphased", "C  Layer-specific, unphased"),
-          ("3_bulk_unphased_exact", "D  Bulk, unphased (exact)"), ("4_reads_d60", "E  + reads (depth 60)"),
-          ("5_reads_background_d60", "F  + background artefacts")]
+panels = [("1_layer_phased", "C  Layer-specific, phased"), ("2_layer_unphased", "D  Layer-specific, unphased"),
+          ("3_bulk_unphased_exact", "E  Bulk, unphased (exact)"), ("4_reads_d60", "F  + read sampling (depth 60)"),
+          ("5_reads_background_d60", "G  + background artefacts")]
 fig = plt.figure(figsize=(11, 5.6))
 gs = fig.add_gridspec(2, 5, height_ratios=[1, 1], hspace=0.55, wspace=0.35)
 bins = np.linspace(0, 1, 101)
@@ -38,7 +38,7 @@ for dpt in (20, 60, 150):
     d = v[(v.level == f"4_reads_d{dpt}") & (v.kind == "L2")]
     h, _ = np.histogram(d.vaf, bins); ax.stairs(h / reps, bins, color=DCOL[dpt], lw=1.4, label=f"mean depth {dpt}")
 ax.axvline(0.35, color=GRID, lw=0.8, zorder=0); ax.set_yscale("log"); ax.set_ylim(0.5, None); ax.set_xlim(0, 0.8)
-ax.set_title("G  L2 variants by depth (L2-fixed: 0.35)", loc="left", fontsize=8.5)
+ax.set_title("H  L2 variants by depth (L2-fixed: 0.35)", loc="left", fontsize=8.5)
 ax.set_xlabel("observed VAF"); ax.set_ylabel("variants per tree"); ax.legend(frameon=False, fontsize=7); ax.grid(axis="y", color=GRID, lw=0.5)
 ax = fig.add_subplot(gs[1, 2:4])
 edges = np.geomspace(0.001, 0.5, 25)
@@ -49,5 +49,5 @@ for dpt in (20, 60, 150):
     mid = np.sqrt(edges[g.index - 1] * edges[g.index])
     ax.plot(mid, g.values, color=DCOL[dpt], lw=1.6, marker="o", ms=3, label=f"mean depth {dpt}")
 ax.set_xscale("log"); ax.set_xlim(1e-3, 0.5); ax.set_ylim(0, 1.02); ax.set_xlabel("true assay VAF (c_k f / 2)"); ax.set_ylabel("fraction detected")
-ax.set_title("H  Detection of true variants by depth", loc="left", fontsize=8.5); ax.legend(frameon=False, fontsize=7); ax.grid(color=GRID, lw=0.5)
+ax.set_title("I  Detection of true variants by depth", loc="left", fontsize=8.5); ax.legend(frameon=False, fontsize=7); ax.grid(color=GRID, lw=0.5)
 fig.savefig(out, dpi=200, bbox_inches="tight"); print("wrote", out)
