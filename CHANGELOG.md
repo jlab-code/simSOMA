@@ -56,6 +56,10 @@ Fixes agreed 2026-10-07 during the manuscript revision. Paper-relevant notes in 
   VERSION -> simSOMA-v0.2.0-dev. NOTE: fitSOMA 0.3.19 accepts simSOMA >=0.1,<0.2 only; its
   adapter range needs a one-line update for 0.2.x (otherwise compatible: validate + adapter
   simulation pass with the version string patched).
+- **TLS topologies** (`simsoma topology-from-tls`, `simSOMA_corefunc/topology_tls.py`): TreeQSM-style
+  segment tables -> topology in meters (same-order chains merged into axes, branch positions from base
+  distances, organ selection, pruning of unsampled sub-trees). Doc `simSOMA_docs/tls_topology.md`,
+  example config `simSOMA_configs/example_tls_tree.json`, tests `tests/test_topology_tls.py`.
 - Tests: `tests/test_observation_layers.py` (observation model, layers, organ multiplier, CLI),
   `tests/test_founder_sectors.py` (closed form; realized vs exact; independence of rho and
   branch order), `tests/test_code_fixes.py` (mapping, displacement, aliases). Checked compatible with

@@ -171,3 +171,8 @@ If you use simSOMA, please cite the accompanying paper and the software reposito
 ## License
 
 simSOMA is released under the MIT License. See `LICENSE`.
+
+## Topologies from terrestrial laser scans
+
+`simsoma topology-from-tls SEGMENTS.txt OUT.json --organs random:30` converts a TreeQSM-style segment
+table into a topology in meters; see `simSOMA_docs/tls_topology.md`.

@@ -4,6 +4,7 @@
     simsoma check CONFIG                                       topology check / plots only
     simsoma layers CONFIG                                      per-layer simulation + read-level observation
     simsoma topology-from-csv BRANCHES ORGANS OUT [--unit years|meters|steps]
+    simsoma topology-from-tls SEGMENTS OUT [--organs random:30] [...]   TLS / TreeQSM segment table
     simsoma template layered                                   print a layered-config template
     simsoma version
 """
@@ -30,6 +31,14 @@ def _versions() -> dict:
 
 
 def main(argv=None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    if argv[:1] == ["topology-from-tls"]:          # own argument parser (incl. --help)
+        simsoma.use_core()
+        import topology_tls
+        try:
+            return int(topology_tls.main(argv[1:]))
+        except ValueError as exc:
+            print(f"simsoma: {exc}", file=sys.stderr); return 2
     ap = argparse.ArgumentParser(prog="simsoma", description="simSOMA: somatic VAF spectra from plant cell lineages")
     sub = ap.add_subparsers(dest="cmd", required=True)
     r = sub.add_parser("run", help="topology check + grid simulation from a JSON config")
@@ -46,6 +55,9 @@ def main(argv=None) -> int:
     t.add_argument("branches_csv", type=Path); t.add_argument("organs_csv", type=Path); t.add_argument("out_json", type=Path)
     t.add_argument("--unit", default="years", choices=["years", "meters", "steps"])
     t.add_argument("--report", type=Path, default=None)
+    tl = sub.add_parser("topology-from-tls", add_help=False,
+                        help="convert a TLS (TreeQSM-style) segment table to topology JSON (meters)")
+    tl.add_argument("tls_args", nargs=argparse.REMAINDER)
     tp = sub.add_parser("template", help="print a config template")
     tp.add_argument("kind", choices=["layered"])
     sub.add_parser("version", help="print versions")
