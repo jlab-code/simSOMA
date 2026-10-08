@@ -82,9 +82,10 @@ TOPOLOGY_OUTPUT_FIELDS = [
 
 REALIZED_EVENT_TRUTH_FIELDS = [
     "set_id", "set_label", "rep", "seed", "event_type", "event_id",
-    "parent_branch_id", "target_id", "founder_sector_count",
-    "founder_effective_sectors", "founder_diversity",
+    "parent_branch_id", "target_id", "founder_definition", "founder_sector_count",
+    "founder_polyclonal", "founder_effective_sectors", "founder_diversity",
     "founder_dominant_fraction", "founder_lineage_counts_json",
+    "root_lineage_sector_count", "root_lineage_diversity",
     *TOPOLOGY_OUTPUT_FIELDS, *OUTPUT_PARAM_FIELDS,
 ]
 
@@ -1653,11 +1654,15 @@ def _realized_event_truth_rows_for_sim(
                 "event_id": event_id,
                 "parent_branch_id": ev.get("branch_id"),
                 "target_id": event_id,
+                "founder_definition": str(ev.get("founder_definition", "")),
                 "founder_sector_count": int(ev.get("founder_sector_count", 0)),
+                "founder_polyclonal": int(ev.get("founder_polyclonal", int(ev.get("founder_sector_count", 0)) > 1)),
                 "founder_effective_sectors": float(ev.get("founder_effective_sectors", 0.0)),
                 "founder_diversity": float(ev.get("founder_diversity", 0.0)),
                 "founder_dominant_fraction": float(ev.get("founder_dominant_fraction", 0.0)),
                 "founder_lineage_counts_json": json.dumps(counts, sort_keys=True),
+                "root_lineage_sector_count": int(ev.get("root_lineage_sector_count", 0)),
+                "root_lineage_diversity": float(ev.get("root_lineage_diversity", 0.0)),
             })
     return rows
 

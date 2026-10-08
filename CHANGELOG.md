@@ -23,7 +23,18 @@ Fixes agreed 2026-10-07 during the manuscript revision. Paper-relevant notes in 
   written as an extra output column. Realized/configured truth exports `P_b_eff` (branch
   precursor number realized in the child niche); `P_a_eff` is still written as a deprecated
   alias for fitSOMA <= 0.3.19. Example configs updated to `mu_unit`.
-- Tests: `tests/test_code_fixes.py` (mapping, displacement, aliases). Checked compatible with
+- **Founder clonal composition redefined (`local_sector_v1`).** `founder_sector_count`,
+  `founder_diversity`, `founder_effective_sectors`, `founder_dominant_fraction` and
+  `founder_lineage_counts` now refer to the local clonal sectors of the boundary ring at the time
+  of the event (definition in `simSOMA_docs/founder_composition.md`). New: `founder_polyclonal`,
+  `founder_sector_counts`, `founder_definition`; configured truth `phi_B/O`, `pi_B/O_expected`,
+  `sector_count_B/O_expected` (exact expectation). The old values counted root-niche lineage labels
+  and collapsed with turnover and branch order; they remain as `root_lineage_*` (comparison only).
+  Field names consumed by fitSOMA are unchanged, so fitSOMA's pi_B, d_B, pi_O, d_O now follow the
+  corrected definition (checked: fitSOMA targets give pi_O = 0.443 at rho = 0 and 0.5, exact 0.438).
+  [Manuscript figures unaffected: none use founder/lineage statistics.]
+- Tests: `tests/test_founder_sectors.py` (closed form; realized vs exact; independence of rho and
+  branch order), `tests/test_code_fixes.py` (mapping, displacement, aliases). Checked compatible with
   fitSOMA 0.3.19.1 (`validate_simsoma` -> compatible; adapter simulation runs).
 
 ## Unreleased — config-driven observation model and fitSOMA handoff

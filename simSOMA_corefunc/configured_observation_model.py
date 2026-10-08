@@ -306,6 +306,21 @@ def _canonical_truth_aliases(configured: Mapping[str, Any], run_config: Mapping[
         out["P_o"] = int(float(configured["organ_precursor_number_realized_cells"]))
     elif configured.get("organ_precursor_number") is not None:
         out["P_o"] = int(float(configured["organ_precursor_number"]))
+    # Expected clonal composition of founders (local_sector_v1; exact for uniform focal
+    # placement, i.e. no phyllotaxy): phi = (P_eff - 1) m / C, pi = Pr(polyclonal founding).
+    try:
+        from founder_diversity import FOUNDER_DEFINITION_VERSION, polyclonal_founding_expectation
+        out["founder_definition"] = FOUNDER_DEFINITION_VERSION
+        m_i = int(float(configured.get("m", 0)))
+        C_i = out.get("C")
+        for key, P in (("B", out.get("P_b_eff")), ("O", out.get("P_o"))):
+            if m_i >= 1 and C_i and P and int(P) <= int(C_i):
+                e = polyclonal_founding_expectation(int(P), int(C_i), m_i)
+                out[f"phi_{key}"] = e["phi"]
+                out[f"pi_{key}_expected"] = e["probability"]
+                out[f"sector_count_{key}_expected"] = e["expected_sector_count"]
+    except ImportError:
+        pass
     rho = float(configured.get("rho", 0.0))
     rho = min(max(rho, 0.0), 1.0 - 1e-15)
     lam = 0.0 if rho <= 0.0 else -k * math.log1p(-rho)
@@ -340,6 +355,7 @@ def _realized_summary(events: pd.DataFrame) -> dict[str, Any]:
             continue
         sectors = pd.to_numeric(d["founder_sector_count"], errors="coerce")
         diversity = pd.to_numeric(d["founder_diversity"], errors="coerce")
+        # local_sector_v1: realized fraction of polyclonal foundings (see founder_diversity.py)
         out[f"pi_{prefix}"] = float((sectors > 1).mean())
         out[f"d_{prefix}"] = float(diversity.mean())
         out[f"{event_type}_founder_sector_mean"] = float(sectors.mean())
