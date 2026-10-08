@@ -45,3 +45,4 @@ docs/*.pdf
 .vscode/
 .idea/
 *~
+paper/*/data/
