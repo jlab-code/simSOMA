@@ -33,7 +33,29 @@ Fixes agreed 2026-10-07 during the manuscript revision. Paper-relevant notes in 
   Field names consumed by fitSOMA are unchanged, so fitSOMA's pi_B, d_B, pi_O, d_O now follow the
   corrected definition (checked: fitSOMA targets give pi_O = 0.443 at rho = 0 and 0.5, exact 0.438).
   [Manuscript figures unaffected: none use founder/lineage statistics.]
-- Tests: `tests/test_founder_sectors.py` (closed form; realized vs exact; independence of rho and
+- **Shared observation model `plantsoma_obs` (1.0.0).** Depth / read / error / caller /
+  ascertainment steps of the mutation-level transform now call one versioned implementation,
+  merged with the vafSOMA benchmark generator v3 (log-normal site x sample depth, background
+  artefact sites, depth tiers, all-sample site filter). Existing configurations are numerically
+  identical (tested against the previous implementation). Outputs record model version and a
+  settings digest.
+- **Per-layer simulation (`layered.py`, `simsoma layers`).** Independent L1/L2/L3 lineage
+  histories on one topology (own seed and mu_unit per layer; shared developmental parameters and
+  phyllotactic event positions), bulk combination with global or per-organ layer contributions,
+  read-level observation, vafSOMA-format depth-tier tables. Statistically matches the
+  simSOMA_extensions v3 generator (sites per tier, depth quantiles, mutations per layer).
+- **Organ mutation-rate multiplier** `organ_mu_multiplier` (optional organ-module parameter,
+  default 1): scales the per-division rate during organ amplification only. Historical set
+  labels unchanged when 1.
+- **Packaging.** `pyproject.toml` (package `simsoma` with CLI `simsoma`, modules installed as
+  `simsoma_corefunc`, plus `plantsoma_obs`); file layout of `simSOMA_corefunc/` unchanged
+  (fitSOMA interface). Topology plotter and version lookup work from an installed package.
+  CSV topology converter moved to `simSOMA_corefunc/topology_csv.py` (old script path kept).
+  VERSION -> simSOMA-v0.2.0-dev. NOTE: fitSOMA 0.3.19 accepts simSOMA >=0.1,<0.2 only; its
+  adapter range needs a one-line update for 0.2.x (otherwise compatible: validate + adapter
+  simulation pass with the version string patched).
+- Tests: `tests/test_observation_layers.py` (observation model, layers, organ multiplier, CLI),
+  `tests/test_founder_sectors.py` (closed form; realized vs exact; independence of rho and
   branch order), `tests/test_code_fixes.py` (mapping, displacement, aliases). Checked compatible with
   fitSOMA 0.3.19.1 (`validate_simsoma` -> compatible; adapter simulation runs).
 

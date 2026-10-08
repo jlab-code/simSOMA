@@ -683,7 +683,7 @@ def _launch_commands(commands: Sequence[List[str]], *, max_parallel: int, cwd: P
         running = next_running
 
 
-def main() -> None:
+def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description="Split, launch, and merge simSOMA grid runs from one master config.")
     parser.add_argument("--master-config", type=Path, required=True, help="Grouped grid_parameter master config JSON.")
     parser.add_argument("--n-splits", type=int, default=1, help="How many subconfigs to generate.")
@@ -692,7 +692,7 @@ def main() -> None:
     parser.add_argument("--skip-check", action="store_true", help="Do not run the master topology check step.")
     parser.add_argument("--dry-run", action="store_true", help="Write subconfigs and print the planned ranges without launching runs.")
     parser.add_argument("--cleanup-splits", action="store_true", help="Remove grid_splits workspace after a successful merge.")
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     master_config_path = args.master_config.expanduser().resolve()
     if not master_config_path.exists():

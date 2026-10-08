@@ -32,7 +32,9 @@ bash simSOMA_scripts/run_config_local.sh \
 The standard topology check and confirmation behavior remains active. The resulting
 fitSOMA datasets are placed under each scenario's `fitSOMA/` directory.
 
-See:
+See `simSOMA_docs/observation_model_config.md`. (The validation report referenced in earlier
+versions of this note was not part of the repository; the corresponding checks are in
+`tests/test_observation_model.py` and `tests/test_observation_layers.py`.)
 
-- `simSOMA_docs/observation_model_config.md`
-- `reports/SIMSOMA_OBSERVATION_MODEL_VALIDATION_REPORT.md`
+Since 0.2.0 the depth / read / caller steps are delegated to the shared `plantsoma_obs` model
+(numerically identical for existing configurations).

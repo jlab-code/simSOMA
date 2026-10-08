@@ -37,6 +37,7 @@ CONFIG_PARAMS = [
     "organ_precursor_number",
     "organ_total_cells",
     "seq_fraction",
+    "organ_mu_multiplier",
 ]
 
 SELF_RENEWAL_FIELDS = [
@@ -56,7 +57,12 @@ ORGAN_FIELDS = [
     "organ_precursor_number",
     "organ_total_cells",
     "seq_fraction",
+    "organ_mu_multiplier",
 ]
+# Optional module parameters and their defaults (may be omitted from configs).
+OPTIONAL_MODULE_PARAM_DEFAULTS = {
+    "organ": {"organ_mu_multiplier": 1.0},
+}
 DERIVED_OUTPUT_FIELDS = [
     "branch_precursor_number_realized_cells",
     "organ_precursor_number_realized_cells",
@@ -216,6 +222,12 @@ def _software_version_info(pipeline_dir: Path) -> Dict[str, Any]:
     project_root = pipeline_dir.parent
     version_file = project_root / "VERSION"
     version = version_file.read_text(encoding="utf-8").strip() if version_file.exists() else "unversioned"
+    if version == "unversioned":   # installed package: no VERSION file next to the modules
+        try:
+            import simsoma
+            version = f"simSOMA-v{simsoma.__version__}"
+        except ImportError:
+            pass
     tracked = [
         "run_from_config.py",
         "pipeline_wrapper.py",
@@ -227,6 +239,9 @@ def _software_version_info(pipeline_dir: Path) -> Dict[str, Any]:
         "branch_bias.py",
         "topology_io.py",
         "inspect_topology.py",
+        "founder_diversity.py",
+        "layered.py",
+        "transform_observation_model.py",
         "launch_grid_splits.py",
     ]
     files: Dict[str, Any] = {}
@@ -974,6 +989,8 @@ def _extract_module_param_specs(modules: Dict[str, Any]) -> Dict[str, Any]:
                 f"Unknown parameters in simulation.modules.{module_name}: {extra_params}. "
                 f"Allowed parameters are: {list(allowed_params)}."
             )
+        optional = OPTIONAL_MODULE_PARAM_DEFAULTS.get(module_name, {})
+        module_params = {**optional, **module_params}
         missing_params = [p for p in allowed_params if p not in module_params]
         if missing_params:
             raise ValueError(
@@ -1240,6 +1257,8 @@ def _param_id(params: Dict[str, Any]) -> str:
         f"wm{_format_label_value(params['branch_bias_mean'])}",
         f"wk{_format_label_value(params['branch_bias_kappa'])}",
     ]
+    if float(params.get("organ_mu_multiplier", 1.0)) != 1.0:   # keep historical labels unchanged
+        parts.append(f"om{_format_label_value(params['organ_mu_multiplier'])}")
     return "_".join(parts)
 
 
@@ -1271,6 +1290,7 @@ def _build_run_command(
         "--branch_precursor_number", str(params["branch_precursor_number_realized_cells"]),
         "--organ_precursor_number", str(params["organ_precursor_number_realized_cells"]),
         "--organ_total_cells", str(params["organ_total_cells_realized"]),
+        "--organ_mu_multiplier", str(params.get("organ_mu_multiplier", 1.0)),
         "--bias_mode", str(params["bias_mode"]),
         "--branch_bias_value", str(params["branch_bias_value"]),
         "--branch_bias_mean", str(params["branch_bias_mean"]),
@@ -1342,8 +1362,7 @@ def _run_topology_plot(
     if plot_style != "developmental_pruned":
         raise ValueError("Only check.topology_plot.style='developmental_pruned' is available in this cleaned release.")
 
-    project_root = pipeline_dir.parent
-    plotter = project_root / "simSOMA_corefunc" / "plot_topology_json.py"
+    plotter = pipeline_dir / "plot_topology_json.py"   # same folder as this module (repo or installed)
     if not plotter.exists():
         raise FileNotFoundError(f"Topology plotter not found: {plotter}")
 
@@ -1382,7 +1401,7 @@ def _run_topology_plot(
     if bool(plot_cfg.get("show_tip_labels", False)):
         cmd.append("--show_tip_labels")
 
-    subprocess.run(cmd, check=True, cwd=str(project_root))
+    subprocess.run(cmd, check=True, cwd=str(pipeline_dir))
 
     if not bool(plot_cfg.get("write_pdf", DEFAULT_TOPOLOGY_PLOT["write_pdf"])) and topology_pdf.exists():
         topology_pdf.unlink()
@@ -2373,7 +2392,7 @@ def _run_grid_step(*, cfg: Dict[str, Any], raw_cfg: Dict[str, Any], config_path:
     print(f"n_parameter_sets: {total_sets_selected}")
 
 
-def main() -> None:
+def main(argv=None) -> None:
     parser = argparse.ArgumentParser(description="Run simSOMA experiments from a JSON config.")
     parser.add_argument("--config", type=Path, required=True, help="Path to JSON config file.")
     parser.add_argument(
@@ -2383,7 +2402,7 @@ def main() -> None:
         choices=["check", "run"],
         help="Which workflow step to execute. 'check' = inspect/convert/plot topology, 'run' = run simulation from the checked topology.",
     )
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     config_path = args.config.expanduser().resolve()
     if not config_path.exists():

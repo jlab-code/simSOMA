@@ -47,6 +47,13 @@ from pathlib import Path
 from typing import Iterable, Any, Mapping
 
 import numpy as np
+
+try:  # shared plantSOMA observation model (installed package or repository checkout)
+    import plantsoma_obs
+except ImportError:  # running from simSOMA_corefunc/ inside the repository
+    import sys as _sys
+    _sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    import plantsoma_obs
 import pandas as pd
 
 STD_AGG_FILE = "vaf_count_spectrum_aggregated_summaries.csv"
@@ -655,6 +662,7 @@ def _normalize_mutation_observation_config(config: Mapping[str, Any] | None) -> 
 
     ascertainment = dict(cfg.get("ascertainment", {}))
     ascertainment.setdefault("retain_called_any", True)
+    background = dict(cfg.get("background", {}))
 
     if read_model["type"] not in VALID_READ_MODELS:
         raise ValueError(f"read_model.type must be one of {sorted(VALID_READ_MODELS)}")
@@ -677,6 +685,7 @@ def _normalize_mutation_observation_config(config: Mapping[str, Any] | None) -> 
         "depth_model": depth_model,
         "caller": caller,
         "ascertainment": ascertainment,
+        "background": background,
     }
 
 
@@ -793,8 +802,30 @@ def _draw_mutation_depths(
             else:
                 values = np.rint(rng.normal(mean, sd, size=n_mutations)).astype(int)
         else:
-            raise ValueError(f"Unsupported depth_model.mode: {mode!r}")
+            raise ValueError(f"Unsupported depth_model.mode: {mode!r}")  # legacy helper; see plantsoma_obs
         out[:, col] = np.maximum(values, minimum)
+    return out
+
+
+def _plantsoma_obs_config(cfg: Mapping[str, Any]) -> dict[str, Any]:
+    """Map the simSOMA observation_config onto the shared plantsoma_obs model."""
+    dm, rm, cl = cfg["depth_model"], cfg["read_model"], cfg["caller"]
+    depth = {"mode": str(dm.get("mode", "sample_design")),
+             "mean": float(dm.get("default_mean", 100.0)), "sd": float(dm.get("default_sd", 15.0)),
+             "minimum": int(dm.get("minimum", 1))}
+    for k in ("site_sdlog", "sample_sdlog", "max_site_factor"):
+        if k in dm:
+            depth[k] = float(dm[k])
+    out = {
+        "depth": depth,
+        "reads": {"type": str(rm["type"]), "sequencing_error": _parameter_value(rm["sequencing_error"]),
+                  "concentration": _parameter_value(rm["concentration"])},
+        "caller": {"min_depth": int(cl["min_depth"]), "min_alt_reads": int(cl["min_alt_reads"]),
+                   "min_observed_vaf": float(cl["min_observed_vaf"]),
+                   "retain_called_any": bool(cfg["ascertainment"].get("retain_called_any", True))},
+    }
+    if cfg.get("background"):
+        out["background"] = dict(cfg["background"])
     return out
 
 
@@ -811,6 +842,10 @@ def transform_vaf_observations(
     transform.  It combines assay sampling, phasing, depth/read sampling, caller
     emulation, and called-in-any-sample ascertainment.  It deliberately does not
     remove ubiquitous variants or calculate fitSOMA summaries.
+
+    Depth, read, background and caller steps are delegated to the shared, versioned
+    plantsoma_obs model (identical numbers to simSOMA <= 0.1.x for configurations
+    without the new options).
     """
     cfg = _normalize_mutation_observation_config(observation_config)
     design = _prepare_mutation_sample_design(
@@ -822,36 +857,19 @@ def transform_vaf_observations(
 
     contribution = design["effective_layer_contribution"].to_numpy(dtype=float)
     phase = np.asarray([_phase_factor(x) for x in design["phase_mode"]], dtype=float)
-    assay_matrix = np.clip(latent_matrix * contribution[None, :] * phase[None, :], 0.0, 1.0)
+    assay_somatic = np.clip(latent_matrix * contribution[None, :] * phase[None, :], 0.0, 1.0)
 
-    eps = _parameter_value(cfg["read_model"]["sequencing_error"])
-    read_probability = np.clip(
-        assay_matrix * (1.0 - eps) + (1.0 - assay_matrix) * eps, 0.0, 1.0
-    )
-    depth = _draw_mutation_depths(design, cfg, n_mut, rng)
-
-    read_type = str(cfg["read_model"]["type"])
-    if read_type == "binomial":
-        alt = rng.binomial(depth, read_probability)
-    else:
-        concentration = _parameter_value(cfg["read_model"]["concentration"])
-        safe_p = np.clip(read_probability, 1e-10, 1.0 - 1e-10)
-        locus_p = rng.beta(safe_p * concentration, (1.0 - safe_p) * concentration)
-        alt = rng.binomial(depth, locus_p)
-
-    observed_vaf = np.divide(
-        alt, depth, out=np.zeros_like(alt, dtype=float), where=depth > 0
-    )
-    caller = cfg["caller"]
-    callable_mask = depth >= int(caller["min_depth"])
-    called = (
-        callable_mask
-        & (alt >= int(caller["min_alt_reads"]))
-        & (observed_vaf >= float(caller["min_observed_vaf"]))
-    )
-    status = np.full(called.shape, "BELOW_CALL_THRESHOLD", dtype=object)
-    status[~callable_mask] = "NO_COVERAGE"
-    status[called] = "CALLED"
+    pcfg = _plantsoma_obs_config(cfg)
+    means = design["depth_mean"].to_numpy(dtype=float) if "depth_mean" in design.columns else None
+    sds = design["depth_sd"].to_numpy(dtype=float) if "depth_sd" in design.columns else None
+    obs = plantsoma_obs.observe(assay_somatic, pcfg, rng, sample_means=means, sample_sds=sds)
+    eps = float(obs["config"]["reads"]["sequencing_error"])
+    n_bg = int(obs["is_background"].sum())
+    mutation_ids = list(mutation_ids) + [f"bg:{i}" for i in range(n_bg)]
+    latent_matrix = np.vstack([latent_matrix, np.full((n_bg, n_samples), np.nan)]) if n_bg else latent_matrix
+    assay_matrix, depth, alt = obs["assay_vaf"], obs["depth"], obs["alt"]
+    read_probability, callable_mask, called, status = obs["read_probability"], obs["callable"], obs["called"], obs["status"]
+    observed_vaf = np.divide(alt, depth, out=np.zeros_like(alt, dtype=float), where=depth > 0)
 
     rows: list[dict[str, Any]] = []
     for i, mutation_id in enumerate(mutation_ids):
@@ -873,6 +891,7 @@ def transform_vaf_observations(
                 "callable": bool(callable_mask[i, s]),
                 "caller_call": bool(called[i, s]),
                 "caller_status": str(status[i, s]),
+                **({"site_class": "background" if obs["is_background"][i] else "somatic"} if n_bg else {}),
             })
     evidence = pd.DataFrame(rows)
     n_before = int(evidence["mutation_id"].nunique()) if not evidence.empty else 0
@@ -899,6 +918,10 @@ def transform_vaf_observations(
         "n_latent_mutations": n_before,
         "n_candidates_called_any": n_after,
         "complete_mutation_by_sample_matrix": True,
+        "observation_model": "plantsoma_obs",
+        "observation_model_version": obs["version"],
+        "observation_model_config_sha256": obs["config_sha256"],
+        "n_background_sites": n_bg,
         "ubiquitous_filter_applied": False,
     }
     return evidence, metadata

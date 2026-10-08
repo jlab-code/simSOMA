@@ -194,6 +194,7 @@ def run_pipeline(
     branch_comp_params: Optional[Dict[str, Any]] = None,
     module_paths: Optional[Dict[str, str]] = None,
     phyllotaxy_params: Optional[Dict[str, Any]] = None,
+    organ_mu_multiplier: float = 1.0,
 ) -> Dict[str, Any]:
     validate_topology_contract(topo)
 
@@ -431,6 +432,8 @@ def run_pipeline(
                     rng=org_py,
                     np_rng=org_np,
                     focal_index=focal_index,
+                    # passed only when used, so custom organ plugins without the option keep working
+                    **({"mu_multiplier": float(organ_mu_multiplier)} if float(organ_mu_multiplier) != 1.0 else {}),
                 ))
                 if phyllo_site_id is not None:
                     oe["phyllo_site_id"] = str(phyllo_site_id)
@@ -619,6 +622,8 @@ def _cli() -> None:
     p.add_argument("--branch_precursor_number", type=int, default=1)
     p.add_argument("--organ_precursor_number", type=int, default=1)
     p.add_argument("--organ_total_cells", type=int, default=64)
+    p.add_argument("--organ_mu_multiplier", type=float, default=1.0,
+                   help="Multiplier of the per-division mutation rate during organ amplification (default 1).")
     p.add_argument("--sequenced_cells", type=int, default=None)
     p.add_argument("--seed", type=int, default=None)
 
@@ -816,6 +821,7 @@ def _cli() -> None:
                 seed=run_seed,
                 branch_comp_params=branch_comp_params,
                 module_paths=module_paths,
+                organ_mu_multiplier=float(args.organ_mu_multiplier),
             )
 
             sim_entry: Dict[str, Any] = {"rep": rep, "seed": run_seed, "topology_mapping_seed": int(map_seed_combo), "result": res}
@@ -850,6 +856,7 @@ def _cli() -> None:
                     "branch_precursor_number": int(args.branch_precursor_number),
                     "organ_precursor_number": int(args.organ_precursor_number),
                     "organ_total_cells": int(args.organ_total_cells),
+                    "organ_mu_multiplier": float(args.organ_mu_multiplier),
                     "sequenced_cells": args.sequenced_cells,
                     "seed": base_seed,
                     "n_sim": int(args.n_sim),

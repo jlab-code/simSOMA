@@ -10,7 +10,9 @@ from typing import Dict, List, Optional, Sequence, Tuple
 import random
 import numpy as np
 
-from self_renewal import CellState, SelfRenewalParams, Time2D
+from dataclasses import replace
+
+from self_renewal import CellState, SelfRenewalParams, SelfRenewalSimulator, Time2D
 from recruitment_utils import allocate_equalized_quotas, expand_founders_to_exact_leaves, select_contiguous_precursors
 from founder_diversity import summarize_founder_lineages, summarize_founder_sectors
 
@@ -24,6 +26,9 @@ class OrganInputs:
     organ_total_cells: int
     sequenced_cells: Optional[int] = None
     focal_index: Optional[int] = None
+    # Multiplier of the per-division mutation rate during organ amplification only
+    # (terminal-cell mutation rate; default 1 = same rate as all other divisions).
+    mu_multiplier: float = 1.0
 
 
 @dataclass(frozen=True)
@@ -106,8 +111,13 @@ def run_organ_event(
     precursor_mut_tuple = tuple(sorted(int(x) for x in precursor_mut))
 
     quotas = allocate_equalized_quotas(O, recruitment.realized_cells)
+    mult = float(inputs.mu_multiplier)
+    if mult < 0:
+        raise ValueError('organ mu_multiplier must be >= 0')
+    organ_params = params if mult == 1.0 else replace(
+        params, mu_div=SelfRenewalSimulator().mu_div(params) * mult)
     leaves, leaf_depths = expand_founders_to_exact_leaves(
-        params,
+        organ_params,
         precursors,
         quotas,
         rng=(np_rng if np_rng is not None else np.random.default_rng(rng.randrange(2**31))),

@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "simsoma"
+version = "0.2.0.dev0"
+description = "Cell-lineage simulator of somatic variant allele-frequency spectra in plants"
+readme = "README.md"
+requires-python = ">=3.10"
+license = {text = "MIT"}
+authors = [{name = "Frank Johannes", email = "frank@johanneslab.org"}]
+dependencies = ["numpy>=1.24", "pandas>=2.0", "matplotlib>=3.7"]
+
+[project.optional-dependencies]
+test = ["pytest>=7"]
+
+[project.scripts]
+simsoma = "simsoma.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/jlab-code/simSOMA"
+
+[tool.setuptools]
+packages = ["simsoma", "simsoma_corefunc", "plantsoma_obs"]
+
+[tool.setuptools.package-dir]
+simsoma = "simsoma"
+simsoma_corefunc = "simSOMA_corefunc"
+plantsoma_obs = "plantsoma_obs"
+
+[tool.setuptools.package-data]
+plantsoma_obs = ["CHANGELOG.md"]

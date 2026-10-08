@@ -105,6 +105,8 @@ def normalize_observation_model_config(block: Mapping[str, Any]) -> dict[str, An
         read_cfg.setdefault("sequencing_error", block["sequencing_error"])
     if "caller" in block:
         read_cfg.setdefault("caller", block["caller"])
+    if "background" in block:
+        read_cfg.setdefault("background", block["background"])
     # Ascertainment may be written in any of the public forms below.  The
     # nested read_counts value remains authoritative when multiple aliases are
     # present, preserving backward compatibility.
@@ -234,19 +236,24 @@ def _read_count_config(cfg: Mapping[str, Any], layer: str) -> dict[str, Any]:
     mode = str(depth.get("mode", "fixed"))
     value = float(depth.get("value", depth.get("default_mean", 100.0)))
     sd = float(depth.get("sd", depth.get("default_sd", 0.0)))
-    return {
+    depth_model = {
+        # historical mapping: anything other than "fixed" meant per-sample normal depth
+        "mode": mode if mode in ("fixed", "poisson", "lognormal_site_sample") else "sample_design",
+        "default_mean": value,
+        "default_sd": sd,
+        "minimum": int(depth.get("minimum", 1)),
+    }
+    for k in ("site_sdlog", "sample_sdlog", "max_site_factor"):
+        if k in depth:
+            depth_model[k] = float(depth[k])
+    out = {
         "assay": {"source_layer": layer},
         "read_model": {
             "type": str(read.get("distribution", read.get("type", "beta_binomial"))),
             "sequencing_error": float(error),
             "concentration": float(read.get("concentration", 200.0)),
         },
-        "depth_model": {
-            "mode": "fixed" if mode == "fixed" else "sample_design",
-            "default_mean": value,
-            "default_sd": sd,
-            "minimum": int(depth.get("minimum", 1)),
-        },
+        "depth_model": depth_model,
         "caller": {
             "min_depth": int(caller.get("minimum_depth", caller.get("min_depth", 20))),
             "min_alt_reads": int(caller.get("minimum_alt_reads", caller.get("min_alt_reads", 3))),
@@ -254,6 +261,14 @@ def _read_count_config(cfg: Mapping[str, Any], layer: str) -> dict[str, Any]:
         },
         "ascertainment": {"retain_called_any": bool(rc.get("retain_called_any", True))},
     }
+    # Background artefact sites belong to the sample, not to a layer: generated once, with the
+    # first contributing layer (see _read_count_evidence).
+    bg = rc.get("background")
+    if bg and int(dict(bg).get("n_sites", 0)) > 0:
+        first = next((l for l in cfg["layers"] if _contribution(cfg, l) > 0.0), None)
+        if layer == first:
+            out["background"] = dict(bg)
+    return out
 
 
 def _read_count_evidence(raw_group: pd.DataFrame, sample_info: pd.DataFrame, cfg: Mapping[str, Any], seed: int) -> tuple[pd.DataFrame, list[dict[str, Any]]]:
@@ -381,6 +396,7 @@ def _observation_contract(cfg: Mapping[str, Any]) -> dict[str, Any]:
                 "depth_model": dict(layer_cfg["depth_model"]),
                 "caller": dict(layer_cfg["caller"]),
                 "ascertainment": dict(layer_cfg["ascertainment"]),
+                **({"background": dict(layer_cfg["background"])} if layer_cfg.get("background") else {}),
             })
         else:
             contract["layers"].append({

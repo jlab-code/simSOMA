@@ -130,6 +130,7 @@ class DefaultOrganAdapter:
         rng: random.Random,
         np_rng: np.random.Generator,
         focal_index: Optional[int] = None,
+        mu_multiplier: float = 1.0,
     ) -> Dict[str, Any]:
         inputs = _org.OrganInputs(
             organ_id=str(organ_id),
@@ -139,6 +140,7 @@ class DefaultOrganAdapter:
             organ_total_cells=int(organ_total_cells),
             sequenced_cells=sequenced_cells,
             focal_index=(int(focal_index) if focal_index is not None else None),
+            mu_multiplier=float(mu_multiplier),
         )
         org_ev = _org.run_organ_event(sr_params, list(ring_state), inputs, rng=rng, np_rng=np_rng)
         return {

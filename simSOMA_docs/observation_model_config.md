@@ -164,3 +164,24 @@ bash simSOMA_scripts/run_config_local.sh simSOMA_configs/example_observation_rea
 For split runs, the developmental jobs run normally, their outputs are merged, and the
 observation transform runs once on the merged result. It is not duplicated inside each
 split job.
+
+## Shared observation model and new options (simSOMA >= 0.2.0)
+
+The depth, read, error, background and caller steps are implemented once in the versioned
+package `plantsoma_obs` (shared with vafSOMA/fitSOMA). Existing configurations give identical
+numbers. Additional options in `read_counts` configurations:
+
+```json
+"depth": {"mode": "lognormal_site_sample", "value": 60},
+"background": {"n_sites": 2000, "distribution": "gamma:2", "mean": 0.023}
+```
+
+* `lognormal_site_sample`: D ~ Poisson(mean x g_site x e_site,sample), log-normal site
+  (sdlog 0.58, truncated at 3x) and site-by-sample (sdlog 0.235) effects, fitted to beech
+  candidate sites (vafSOMA benchmark generator v3).
+* `background`: artefact sites with the same VAF q in every sample, q ~ exp | gamma:<shape> |
+  lnorm:<sdlog> | mix:<w2>:<mean2> with the given mean (clipped at 0.45); apricot layer data
+  suggest gamma, shape ~2, mean ~0.023. Background rows carry `site_class = background`.
+
+Per-layer simulation (independent lineage histories per SAM layer) is available through
+`simsoma layers` (see README); the grid workflow above keeps the layer-equivalent template.

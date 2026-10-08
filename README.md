@@ -8,12 +8,43 @@ This repository accompanies the paper:
 
 ## Status
 
-This is a beta research-software release. The simulator is usable, but configuration schemas, output tables, and command-line wrappers may still change before a stable release.
+Version 0.2.0 (development; release accompanying the revised paper). Changes since 0.1.0-beta are
+listed in `CHANGELOG.md`.
+
+## Install and command line
+
+```bash
+pip install .            # from the repository root (Python >= 3.10; numpy, pandas, matplotlib)
+simsoma version
+simsoma run simSOMA_configs/quick_test_2organs.json        # topology check + grid simulation
+simsoma run CONFIG --splits 8 --jobs 8                     # split the parameter grid
+simsoma check CONFIG                                       # topology check / plots only
+simsoma layers CONFIG                                      # per-layer simulation + read-level observation
+simsoma template layered > layered.json                    # template for `simsoma layers`
+simsoma topology-from-csv branches.csv organs.csv topology.json --unit meters
+```
+
+The shell wrappers in `simSOMA_scripts/` keep working unchanged.
+
+## Layers and sequencing observation
+
+* `simsoma layers` simulates the SAM layers (e.g. L1, L2, L3) as independent cell-lineage
+  histories on the same topology (own seed and mutation rate per layer, shared developmental
+  parameters and phyllotactic event positions), combines them into bulk organ samples with
+  layer contributions, and applies the read-level observation model. It writes per-layer
+  carrier fractions (truth), read evidence, and optional vafSOMA-format depth-tier tables.
+  See `simSOMA_corefunc/layered.py`.
+* The sequencing observation model (depth, read sampling, sequencing error, background
+  artefacts, caller thresholds, ascertainment) is the separate, versioned package
+  `plantsoma_obs`, shared with the other plantSOMA tools. Every output records its version and a
+  SHA-256 digest of its settings. See `plantsoma_obs/__init__.py` and `plantsoma_obs/CHANGELOG.md`.
 
 ## Repository layout
 
 ```text
 simSOMA/
+├── simsoma/               # package entry point and command-line interface
+├── plantsoma_obs/         # shared, versioned sequencing observation model
 ├── simSOMA_corefunc/      # simulator source code and topology plotting/checking code
 ├── simSOMA_scripts/       # setup, quick-test, local-run, cluster-run, and utility wrappers
 ├── simSOMA_configs/       # example simulation configuration files
@@ -21,6 +52,7 @@ simSOMA/
 ├── simSOMA_docs/          # stable design notes and internal changelog
 ├── docs/                  # pointer to external tutorial documentation
 ├── tests/                 # smoke-test scripts
+├── pyproject.toml
 ├── requirements.txt
 ├── requirements.lock.txt
 ├── VERSION
