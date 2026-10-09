@@ -742,12 +742,12 @@ def main(argv=None) -> None:
         child_name = _child_experiment_name(base_name, split_idx, n_splits_eff, split_axis=args.split_axis)
         child_cfg["run"]["experiment_name"] = child_name
         child_config_path = subconfig_dir / f"{child_name}.json"
-        # Keep project-root-style paths unchanged. The child process inherits
-        # SIMSOMA_HOME, SIMSOMA_OUTPUT_DIR, and SIMSOMA_INPUT_DIR from 00_pipeline.sh,
-        # so paths such as simSOMA_output and simSOMA_inputs/... remain unambiguous
-        # even though child configs live inside grid_splits/subconfigs/.
-        child_cfg["run"]["outdir_root"] = str(raw_cfg["run"]["outdir_root"])
-        child_cfg["topology"]["topology_json"] = str(raw_cfg["topology"]["topology_json"])
+        # Child configs live in grid_splits/subconfigs/, so paths that are relative to the
+        # master config's folder are passed on as resolved absolute paths.
+        child_cfg["run"]["outdir_root"] = str(
+            rfc._resolve_outdir_root(str(raw_cfg["run"]["outdir_root"]), base_dir=master_config_path.parent))
+        child_cfg["topology"]["topology_json"] = str(
+            rfc._resolve_topology_json_path(str(raw_cfg["topology"]["topology_json"]), base_dir=master_config_path.parent))
         child_cfg.setdefault("simulation", {})
         master_observation = raw_cfg.get("observation_model")
         if isinstance(master_observation, dict):

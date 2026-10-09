@@ -10,7 +10,9 @@
 - A missing `topology_json` gives a one-line error naming the resolved path (paths are read
   relative to the config file) instead of a traceback.
 - `simsoma layers`: topology and output paths follow the same rules as `simsoma run`.
-- 47 tests. No change to simulation results.
+- `--splits`: config-relative paths (topology, output folder) now work; split subconfigs
+  previously resolved them relative to `grid_splits/subconfigs/` and failed.
+- 48 tests. No change to simulation results.
 
 ## 0.2.0 — 2026-10-09 (release accompanying the revised paper)
 

@@ -64,5 +64,32 @@ class UsabilityTests(unittest.TestCase):
             run_from_config.main(["--config", str(p), "--step", "check"])
 
 
+
+class SplitPathTests(unittest.TestCase):
+    def test_config_relative_topology_with_splits(self):
+        import shutil
+        d = Path(tempfile.mkdtemp())
+        (d / "b.csv").write_text("branch_id,parent_id,start,end\ntrunk,,0,4\nA,trunk,2,4\n")
+        (d / "o.csv").write_text("organ_id,branch_id,position\nleaf_top,trunk,4\nleaf_A,A,4\n")
+        from simsoma import cli
+        self.assertEqual(cli.main(["topology-from-csv", str(d / "b.csv"), str(d / "o.csv"),
+                                   str(d / "t.json"), "--unit", "years"]), 0)
+        cfg = {"run": {"experiment_name": "split", "outdir_root": "out", "seed": 1},
+               "topology": {"topology_json": "t.json", "mapping_unit": "years", "mapping_rate": 2},
+               "simulation": {"n_sim": 1, "modules": {
+                   "self_renewal": {"m": {"values": [2, 3]}, "rho": 0, "mu_unit": 1, "victim_locality": 0,
+                                    "bias_mode": "fixed", "branch_bias_value": 0, "branch_bias_mean": 0,
+                                    "branch_bias_kappa": 1},
+                   "pre_branching": {"sam_boundary_cells": 8}, "branching": {"branch_precursor_number": 2},
+                   "organ": {"organ_precursor_number": 2, "organ_total_cells": 16, "seq_fraction": 1}}}}
+        (d / "c.json").write_text(json.dumps(cfg))
+        import os
+        os.environ.setdefault("SIMSOMA_SKIP_TOPOLOGY_CONFIRM", "1")
+        rc = cli.main(["run", str(d / "c.json"), "--splits", "2", "--jobs", "1"])
+        self.assertEqual(rc, 0)
+        self.assertTrue((d / "out" / "split" / "grid_parameter" / "parameter_sets.csv").exists())
+        shutil.rmtree(d)
+
+
 if __name__ == "__main__":
     unittest.main()
