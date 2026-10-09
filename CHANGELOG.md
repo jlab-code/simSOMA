@@ -1,5 +1,17 @@
 # Changelog
 
+## 0.2.1 — 2026-10-09 (usability fixes found while writing the new tutorial)
+
+- `simsoma topology-from-csv` works (the CLI passed positional arguments to a converter that
+  expects `--branches/--organs/--out`, so the documented command always failed).
+- Topology plot: start/end coordinates are derived from branch lengths and event positions
+  when a hand-written topology omits them (the plot was empty); rotated tip labels and the
+  title are no longer cut off.
+- A missing `topology_json` gives a one-line error naming the resolved path (paths are read
+  relative to the config file) instead of a traceback.
+- `simsoma layers`: topology and output paths follow the same rules as `simsoma run`.
+- 47 tests. No change to simulation results.
+
 ## 0.2.0 — 2026-10-09 (release accompanying the revised paper)
 
 - **TLS segment tables as a topology input mode.** `topology.topology_tls` in a config converts a
