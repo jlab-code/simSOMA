@@ -140,9 +140,9 @@
       "L3"
     ],
     "layer_weights": [
-      0.322,
-      0.603,
-      0.075
+      0.13,
+      0.84,
+      0.03
     ],
     "sampling": "bulk",
     "phase": "unphased",

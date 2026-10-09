@@ -5,6 +5,10 @@
 - `simsoma layers`: documentation `simSOMA_docs/layered_simulation.md` (model, per-organ layer
   mixtures with `default`, template defaults for leaves and their literature sources, outputs);
   the template carries a short `_about` note pointing to it.
+- Template layer contributions changed from 0.322 / 0.603 / 0.075 (origin not documented) to the
+  mean of three published leaf compositions, L1 0.13 / L2 0.84 / L3 0.03 (only the template; no
+  effect on existing configs); same values in
+  `simSOMA_configs/example_observation_read_counts_realistic.json`.
 
 ## 0.2.1 — 2026-10-09 (usability fixes found while writing the new tutorial)
 

@@ -47,27 +47,37 @@ cell lineage per topology unit). Any set of layers can be used, e.g. only L1 and
 
 ## Template defaults (leaves) and their sources
 
-The template values are literature-informed defaults for **leaves**. They are a starting point, not
-estimates for a particular species or tissue: adapt them to your system.
+The template values are defaults for **leaves**, derived from the literature below. They are a
+starting point, not estimates for a particular species or tissue: adapt them to your system.
 
 | Setting | Template value | Basis |
 |---|---|---|
-| `layer_contributions` | L1 0.322, L2 0.603, L3 0.075 | literature-informed leaf composition (sources below) |
-| `simulation.layers.*.mu_unit` | L1 0.95, L2 0.55, L3 0.55 | relative values; L1 accumulates more mutations than the inner layers (Goel et al. 2024; Amundson et al. 2025) |
+| `layer_contributions` | L1 0.13, L2 0.84, L3 0.03 | mean of the three quantitative leaf compositions below, each rescaled to L1 + L2 + L3 = 1 |
+| `simulation.layers.*.mu_unit` | L1 0.95, L2 0.55, L3 0.55 | illustrative relative values: L1 accumulates more mutations than the inner layers (Goel et al. 2024; Amundson et al. 2025) |
 
-Published leaf compositions:
+Quantitative leaf compositions (L1 = epidermis, L2 = mesophyll, L3 = vasculature):
+
+| Reference | System | Reported | Rescaled L1 / L2 / L3 |
+|---|---|---|---|
+| Pyke, Marrison & Leech 1991 | *Arabidopsis thaliana*, first leaf | tissue volume mesophyll : airspace : epidermis : vasculature = 61 : 26 : 12 : 1 | 0.162 / 0.824 / 0.014 |
+| Tolleter et al. 2024 | *A. thaliana*, mature leaf atlas | photosynthetic cells 86% and epidermis 14% of cellular volume; veins 0.7% of leaf volume | 0.139 / 0.854 / 0.007 |
+| Goel et al. 2024 | apricot leaves | leaf scRNA-seq: mesophyll 78.2%, epidermis 8.9%, vasculature 7.2% of cells | 0.094 / 0.829 / 0.076 |
+| **Mean** | | | **0.132 / 0.836 / 0.032** |
+
+Further observations on layers and VAFs:
 
 | Reference | System | Finding |
 |---|---|---|
-| Pyke, Marrison & Leech 1991 | *Arabidopsis thaliana*, first leaf | tissue volume mesophyll (L2) : airspace : epidermis (L1) : vasculature (L3) = 61 : 26 : 12 : 1 |
-| Tolleter et al. 2024 | *A. thaliana*, mature leaf atlas | photosynthetic (L2) cells 86% of cellular volume; epidermis 14%; veins 0.7% of leaf volume |
-| Goel et al. 2024 | apricot fruits and leaves | leaf scRNA-seq: mesophyll (L2) 78.2%, epidermis (L1) 8.9%, vasculature (L3) 7.2%; >90% of somatic mutations layer-specific; higher mutation load in L1 |
+| Goel et al. 2024 | apricot fruits and leaves | >90% of somatic mutations layer-specific; higher mutation load in L1 |
 | Ren et al. 2021 | *Salix suchowensis* leaves | most leaf somatic mutations at VAF < 0.3, consistent with leaves founded by several cell lineages |
 | Amundson et al. 2025 | potato (tetraploid), whole leaf and layer-enriched fractions | L1-like mutations near VAF 0.06, L2/L3-like near 0.20; higher L1 mutation rate |
 
-Together these suggest an L2 contribution of roughly 0.60-0.85 in leaves. A fixed heterozygous L2
-mutation in unphased bulk leaf DNA is then expected at VAF 0.5 x c_L2, i.e. about 0.30-0.43. In woody
-species (willow), leaf somatic mutations are mostly found below VAF 0.3.
+Notes. The compositions are tissue volumes or cell counts, not shares of sequenced DNA; differences
+in nuclear DNA content between cell types (e.g. endoreduplication) can shift the DNA share. The three
+studies give an L2 share of 0.82-0.85; allowing for species differences, a conservative range is
+about 0.60-0.85. A fixed heterozygous L2 mutation in unphased bulk leaf DNA is then expected at VAF
+0.5 x c_L2, i.e. about 0.30-0.43 (0.42 with the template value). In woody species (willow), leaf
+somatic mutations are mostly found below VAF 0.3.
 
 ## Outputs
 

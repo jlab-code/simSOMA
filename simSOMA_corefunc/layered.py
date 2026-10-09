@@ -153,8 +153,9 @@ def observe_layered(carriers: pd.DataFrame, contributions: Any, observation_conf
 
 # --------------------------------------------------------------------------- config-driven run
 LAYERED_CONFIG_TEMPLATE = {
-    "_about": ("Template for `simsoma layers`. Layer contributions and per-layer mutation rates are "
-               "literature-informed defaults for leaves; adapt them to your tissue. "
+    "_about": ("Template for `simsoma layers`. Layer contributions are the mean of published leaf "
+               "compositions; per-layer mutation rates are illustrative relative values. Adapt both to "
+               "your tissue. "
                "layer_contributions can also be given per organ: {organ: {layer: c}, 'default': {...}}. "
                "Sources and details: simSOMA_docs/layered_simulation.md"),
     "topology": {"topology_json": "path/to/topology.json", "mapping_unit": "years", "mapping_rate": 5.0,
@@ -164,7 +165,7 @@ LAYERED_CONFIG_TEMPLATE = {
                                   "organ_precursor_number": 10, "organ_total_cells": 1000, "sequenced_cells": 1000,
                                   "organ_mu_multiplier": 1.0},
                    "layers": {"L1": {"mu_unit": 0.95}, "L2": {"mu_unit": 0.55}, "L3": {"mu_unit": 0.55}}},
-    "observation": {"phase": "unphased", "layer_contributions": {"L1": 0.322, "L2": 0.603, "L3": 0.075},
+    "observation": {"phase": "unphased", "layer_contributions": {"L1": 0.13, "L2": 0.84, "L3": 0.03},
                     "model": {"depth": {"mode": "lognormal_site_sample", "mean": 60},
                               "reads": {"type": "binomial", "sequencing_error": 0.0},
                               "background": {"n_sites": 2000, "distribution": "gamma:2", "mean": 0.023},
