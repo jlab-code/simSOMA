@@ -520,7 +520,11 @@ def main(argv=None):
     for spine in ["left", "bottom"]:
         ax.spines[spine].set_linewidth(args.axis_linewidth)
     if args.title:
-        ax.set_title(args.title, fontsize=args.label_size)
+        pad = 6.0
+        if args.show_tip_labels:   # rotated tip labels sit above the axes: lift the title over them
+            longest = max((len(o["organ_id"]) for orgs in terminal_organs.values() for o in orgs), default=0)
+            pad += 0.62 * args.tick_size * longest + 4.0
+        ax.set_title(args.title, fontsize=args.label_size, pad=pad)
     fig.subplots_adjust(left=0.18, right=0.98, bottom=0.10, top=0.98)
 
     args.outdir.mkdir(parents=True, exist_ok=True)
@@ -528,8 +532,9 @@ def main(argv=None):
     out_pdf = args.outdir / f"{args.out_name}.pdf"
     out_csv = args.outdir / f"{args.out_name}_layout.csv"
     out_report = args.outdir / f"{args.out_name}_report.json"
-    fig.savefig(out_png, dpi=args.dpi)
-    fig.savefig(out_pdf, dpi=args.dpi)
+    # tight bounding box: keeps the title and rotated tip labels inside the image
+    fig.savefig(out_png, dpi=args.dpi, bbox_inches="tight", pad_inches=0.05)
+    fig.savefig(out_pdf, dpi=args.dpi, bbox_inches="tight", pad_inches=0.05)
     plt.close(fig)
 
     fieldnames = ["type", "id", "parent", "branch_order", "start_age", "draw_end_age", "true_end_age", "x", "n_terminal_organs_in_subtree"]

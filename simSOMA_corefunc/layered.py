@@ -198,7 +198,11 @@ def run_layered_config(config_path: str | Path) -> Dict[str, Any]:
     validate_layered_config(cfg)
     base = config_path.parent
     tcfg = cfg["topology"]
-    tpath = Path(tcfg["topology_json"]); tpath = tpath if tpath.is_absolute() else base / tpath
+    import run_from_config as _rfc          # same path rules as `simsoma run`
+    tpath = _rfc._resolve_topology_json_path(str(tcfg["topology_json"]), base_dir=base)
+    if not tpath.is_file():
+        raise FileNotFoundError(f"topology.topology_json not found: {tpath}\n"
+                                "Relative paths are read relative to the folder of the config file.")
     unit = str(tcfg.get("mapping_unit", "steps"))
     rate = float(tcfg.get("mapping_rate", 1.0))
     mapping = None if unit == "steps" else {"unit": unit, "rate": rate, "mode": "deterministic"}
@@ -207,7 +211,7 @@ def run_layered_config(config_path: str | Path) -> Dict[str, Any]:
     seed, n_rep = int(sim.get("seed", 0)), int(sim.get("n_replicates", 1))
     topo = topology_io.load_topology_auto(tpath, mapping=mapping, phyllotaxy_config=phyl,
                                           phyllotaxy_seed=layer_seed(seed, 0, "phyllotaxy"))
-    out = Path(cfg["output"]["dir"]); out = out if out.is_absolute() else base / out
+    out = _rfc._resolve_outdir_root(str(cfg["output"]["dir"]), base_dir=base)
     out.mkdir(parents=True, exist_ok=True)
     kappa = rate if unit != "steps" else float(P.get("kappa_sr", 1.0))
     written = []
