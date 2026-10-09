@@ -57,7 +57,8 @@ The shell wrappers in `simSOMA_scripts/` keep working unchanged.
   parameters and phyllotactic event positions), combines them into bulk organ samples with
   layer contributions, and applies the read-level observation model. It writes per-layer
   carrier fractions (truth), read evidence, and optional vafSOMA-format depth-tier tables.
-  See `simSOMA_corefunc/layered.py`.
+  Layer mixtures can be set for all organs or per organ; the template defaults are
+  literature-informed values for leaves. See `simSOMA_docs/layered_simulation.md`.
 * The sequencing observation model (depth, read sampling, sequencing error, background
   artefacts, caller thresholds, ascertainment) is the separate, versioned package
   `plantsoma_obs`, shared with the other plantSOMA tools. Every output records its version and a

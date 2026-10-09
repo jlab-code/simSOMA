@@ -153,6 +153,10 @@ def observe_layered(carriers: pd.DataFrame, contributions: Any, observation_conf
 
 # --------------------------------------------------------------------------- config-driven run
 LAYERED_CONFIG_TEMPLATE = {
+    "_about": ("Template for `simsoma layers`. Layer contributions and per-layer mutation rates are "
+               "literature-informed defaults for leaves; adapt them to your tissue. "
+               "layer_contributions can also be given per organ: {organ: {layer: c}, 'default': {...}}. "
+               "Sources and details: simSOMA_docs/layered_simulation.md"),
     "topology": {"topology_json": "path/to/topology.json", "mapping_unit": "years", "mapping_rate": 5.0,
                  "phyllotaxy": {"mode": "off"}},
     "simulation": {"seed": 0, "n_replicates": 1,

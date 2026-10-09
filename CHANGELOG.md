@@ -1,5 +1,11 @@
 # Changelog
 
+## Unreleased
+
+- `simsoma layers`: documentation `simSOMA_docs/layered_simulation.md` (model, per-organ layer
+  mixtures with `default`, template defaults for leaves and their literature sources, outputs);
+  the template carries a short `_about` note pointing to it.
+
 ## 0.2.1 — 2026-10-09 (usability fixes found while writing the new tutorial)
 
 - `simsoma topology-from-csv` works (the CLI passed positional arguments to a converter that

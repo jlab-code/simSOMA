@@ -155,5 +155,20 @@ class CliTests(unittest.TestCase):
             self.assertEqual(main(["run", str(Path(d) / "missing.json")]), 2)
 
 
+
+
+class LayeredTemplateTests(unittest.TestCase):
+    def test_template_valid_and_per_organ_contributions(self):
+        import layered
+        layered.validate_layered_config(layered.LAYERED_CONFIG_TEMPLATE)
+        m = layered.resolve_contributions(
+            {"leaf_A": {"L1": 0.2, "L2": 0.7, "L3": 0.1}, "default": {"L1": 0.3, "L2": 0.6, "L3": 0.1}},
+            ["leaf_A", "leaf_B"], ["L1", "L2", "L3"])
+        self.assertAlmostEqual(m.loc["leaf_A", "L2"], 0.7)
+        self.assertAlmostEqual(m.loc["leaf_B", "L2"], 0.6)
+        with self.assertRaises(ValueError):
+            layered.resolve_contributions({"leaf_A": {"L1": 1.0}}, ["leaf_A", "leaf_B"], ["L1"])
+
+
 if __name__ == "__main__":
     unittest.main()
