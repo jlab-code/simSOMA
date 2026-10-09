@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.2 — 2026-10-09 (documentation; simulation results unchanged)
 
 - `simsoma layers`: documentation `simSOMA_docs/layered_simulation.md` (model, per-organ layer
   mixtures with `default`, template defaults for leaves and their literature sources, outputs);

@@ -8,7 +8,7 @@ This repository accompanies the paper:
 
 ## Status
 
-Version 0.2.1 (release accompanying the revised paper). Changes since 0.1.0-beta are listed in
+Version 0.2.2 (release accompanying the revised paper). Changes since 0.1.0-beta are listed in
 `CHANGELOG.md`.
 
 ## Install and command line

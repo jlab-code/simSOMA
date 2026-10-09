@@ -6,7 +6,7 @@ by the CLI. The shared sequencing observation model is the separate ``plantsoma_
 """
 from pathlib import Path
 
-__version__ = "0.2.1"
+__version__ = "0.2.2"
 
 
 def core_path() -> Path:
