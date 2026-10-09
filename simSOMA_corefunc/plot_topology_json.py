@@ -76,6 +76,70 @@ def apply_y_ticks(ax, tick_text, ymin: float, ymax: float):
     }
 
 
+def fill_missing_coordinates(topo) -> None:
+    """Derive start_age / end_age (branches) and age (events) where a topology gives only
+    lengths and relative positions (pos, or branch-local time). Existing values are kept;
+    start / end / position are accepted as aliases."""
+    branches = {str(b["id"]): b for b in topo.get("branches", []) if isinstance(b, dict) and "id" in b}
+    events = [e for e in topo.get("events", []) if isinstance(e, dict)]
+    for b in branches.values():
+        if b.get("start_age") is None and b.get("start") is not None:
+            b["start_age"] = b["start"]
+        if b.get("end_age") is None and b.get("end") is not None:
+            b["end_age"] = b["end"]
+    for e in events:
+        if e.get("age") is None and e.get("position") is not None:
+            e["age"] = e["position"]
+
+    def length(b):
+        if b.get("length") is not None:
+            return fnum(b.get("length"), 0.0)
+        if b.get("start_age") is not None and b.get("end_age") is not None:
+            return fnum(b["end_age"], 0.0) - fnum(b["start_age"], 0.0)
+        return 0.0
+
+    def rel_pos(e, b):
+        if e.get("pos") is not None:
+            return fnum(e["pos"], 0.0)
+        if e.get("time") is not None and length(b) > 0:
+            return fnum(e["time"], 0.0) / length(b)
+        return None
+
+    attach = {str(e.get("target")): e for e in events if e.get("type") == "branch"}
+    resolving = set()
+
+    def start(bid):
+        b = branches[bid]
+        if b.get("start_age") is not None:
+            return fnum(b["start_age"], 0.0)
+        if bid in resolving:            # cycle: leave unresolved
+            return 0.0
+        resolving.add(bid)
+        parent = b.get("parent")
+        ev = attach.get(bid)
+        if parent is None or str(parent) not in branches:
+            s = 0.0
+        else:
+            pb = branches[str(parent)]
+            pos = rel_pos(ev, pb) if ev is not None else None
+            s = start(str(parent)) + (pos if pos is not None else 1.0) * length(pb)
+        b["start_age"] = s
+        resolving.discard(bid)
+        return s
+
+    for bid, b in branches.items():
+        s = start(bid)
+        if b.get("end_age") is None:
+            b["end_age"] = s + length(b)
+    for e in events:
+        if e.get("age") is None:
+            bid = str(e.get("branch") or e.get("parent") or "")
+            if bid in branches:
+                pos = rel_pos(e, branches[bid])
+                if pos is not None:
+                    e["age"] = fnum(branches[bid]["start_age"], 0.0) + pos * length(branches[bid])
+
+
 def load_topology(path: Path):
     if path.is_dir():
         raise SystemExit(
@@ -86,6 +150,7 @@ def load_topology(path: Path):
         raise SystemExit(f"Topology JSON not found: {path}")
     with path.open() as fh:
         topo = json.load(fh)
+    fill_missing_coordinates(topo)
     branches = {str(b["id"]): b for b in topo.get("branches", []) if isinstance(b, dict) and "id" in b}
     children = defaultdict(list)
     roots = []

@@ -73,7 +73,8 @@ def main(argv=None) -> int:
             print(json.dumps(layered.LAYERED_CONFIG_TEMPLATE, indent=2)); return 0
         if a.cmd == "topology-from-csv":
             import topology_csv
-            args = [str(a.branches_csv), str(a.organs_csv), str(a.out_json), "--unit", a.unit]
+            args = ["--branches", str(a.branches_csv), "--organs", str(a.organs_csv),
+                    "--out", str(a.out_json), "--unit", a.unit]
             if a.report:
                 args += ["--report", str(a.report)]
             return int(topology_csv.main(args))

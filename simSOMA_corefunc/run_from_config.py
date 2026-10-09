@@ -2481,6 +2481,13 @@ def main(argv=None) -> None:
     cfg = _normalize_config(raw_cfg)
     _materialize_tls_topology(cfg, config_path=config_path)
     _validate_config(cfg)
+    if cfg.get("topology_json"):
+        topo_path = _resolve_topology_json_path(str(cfg["topology_json"]), base_dir=config_path.parent)
+        if not topo_path.is_file():
+            raise FileNotFoundError(
+                f"topology.topology_json not found: {topo_path}\n"
+                "Relative paths are read relative to the folder of the config file."
+            )
 
     if args.step == "check":
         _run_check_step(cfg=cfg, raw_cfg=raw_cfg, config_path=config_path, pipeline_dir=pipeline_dir)
