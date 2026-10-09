@@ -701,7 +701,14 @@ def main(argv=None) -> None:
     pipeline_dir = Path(__file__).resolve().parent
     raw_cfg = json.loads(master_config_path.read_text(encoding="utf-8"))
     cfg = rfc._normalize_config(raw_cfg)
+    rfc._materialize_tls_topology(cfg, config_path=master_config_path)
     rfc._validate_config(cfg)
+    if raw_cfg.get("topology", {}).get("topology_tls") is not None:
+        # Convert the TLS table once; split runs read the converted topology JSON.
+        raw_cfg = copy.deepcopy(raw_cfg)
+        raw_cfg["topology"].pop("topology_tls")
+        raw_cfg["topology"]["topology_json"] = str(cfg["topology_json"])
+        raw_cfg["topology"]["mapping_unit"] = "meters"
 
     total_sets = rfc._grid_total_n_sets(cfg["modules"])
     total_replicates = int(cfg["n_sim"])

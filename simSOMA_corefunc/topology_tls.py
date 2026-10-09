@@ -8,7 +8,7 @@ TreeQSM, one row per segment, with at least the columns
 (other columns, e.g. diameters, height_m, azimuth_deg, are optional and partly kept as
 metadata). A segment is a piece of a branch between two branching points.
 
-Conversion (based on the conversion script written with ChatGPT for the TLS tree04 runs;
+Conversion (based on the conversion script written with ChatGPT for earlier TLS runs;
 reviewed and extended for simSOMA 0.2.0):
 
 1. Axes. Chains of segments of the same branch order are merged into one branch axis (a
@@ -19,9 +19,8 @@ reviewed and extended for simSOMA 0.2.0):
 2. Branch events. A child axis is attached to its parent axis at
        pos = (base_distance(child start) - base_distance(parent axis start)) / length(parent axis),
    i.e. by the path distance from the tree base, which is consistent along axes in TreeQSM
-   tables. (The named parent segment is not used for the position: in the tree10 example,
-   about a third of child branches have base distances beyond the end of their named parent
-   segment, by 0.08 m in the median.) Positions are clipped to [0, 1]; the number of clipped events is
+   tables. (The named parent segment is not used for the position: in real scans many child
+   branches have base distances before or beyond the end of their named parent segment.) Positions are clipped to [0, 1]; the number of clipped events is
    reported.
 3. Organs. One candidate organ at the tip (pos = 1) of every axis. Which candidates are kept is
    set by `organs` ("all", "random:<n>", "min_order:<k>", "orders:<k1,k2,...>", or an explicit

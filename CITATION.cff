@@ -4,8 +4,8 @@ title: "simSOMA: a cell-lineage based simulator of the somatic VAF spectrum in p
 authors:
   - family-names: "Johannes"
     given-names: "Frank"
-version: "0.1.0-beta"
-date-released: 2026-06-25
+version: "0.2.0"
+date-released: 2026-10-09
 url: "https://github.com/jlab-code/simSOMA"
 repository-code: "https://github.com/jlab-code/simSOMA"
 license: "MIT"

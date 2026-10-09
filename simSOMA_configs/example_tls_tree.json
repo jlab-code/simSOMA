@@ -5,10 +5,16 @@
     "seed": 1
   },
   "topology": {
-    "topology_json": "simSOMA_inputs/tls/tree_topology.json",
+    "topology_tls": {
+      "segments": "simSOMA_inputs/examples/tls_synthetic_segments.txt",
+      "organs": "all",
+      "min_axis_length": 0.0,
+      "prune": true,
+      "seed": 0
+    },
     "mapping_unit": "meters",
     "mapping_mode": "deterministic",
-    "mapping_rate": 10.0,
+    "mapping_rate": 5.0,
     "phyllotaxy": {
       "mode": "off",
       "divergence_angle_deg": 137.5,
@@ -38,7 +44,7 @@
       "branch_color_mode": "order",
       "write_pdf": true,
       "write_layout_csv": true,
-      "title": "TLS tree",
+      "title": "Synthetic TLS tree",
       "y_label": "auto"
     }
   },

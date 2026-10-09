@@ -77,5 +77,58 @@ class TLSTests(unittest.TestCase):
             topology_tls.read_segment_table(p)
 
 
+
+
+class TLSConfigInputTests(unittest.TestCase):
+    """topology.topology_tls: TLS segment table as a config input mode."""
+
+    def _cfg(self, topology, d):
+        import run_from_config as rfc
+        raw = {"run": {"experiment_name": "e", "outdir_root": str(d / "out"), "seed": 1},
+               "topology": topology, "simulation": {"n_sim": 1}}
+        cfgp = d / "c.json"; cfgp.write_text(json.dumps(raw))
+        return rfc, rfc._normalize_config(raw), cfgp
+
+    def test_materialized_topology_matches_converter(self):
+        seg = write(ROWS); d = seg.parent
+        rfc, cfg, cfgp = self._cfg({"topology_tls": {"segments": str(seg), "organs": "min_order:1"},
+                                    "mapping_rate": 5.0}, d)
+        self.assertEqual(cfg["mapping_unit"], "meters")                 # default for TLS input
+        rfc._materialize_tls_topology(cfg, config_path=cfgp)
+        got = json.loads(Path(cfg["topology_json"]).read_text())
+        ref = topology_tls.convert(topology_tls.read_segment_table(seg), organs="min_order:1",
+                                   source_name=seg.name)[0]
+        self.assertEqual(got, ref)
+        rep = json.loads((Path(cfg["topology_json"]).parent / "tls_conversion_report.json").read_text())
+        self.assertEqual(len(rep["source_sha256"]), 64)
+        t = topology_io.load_topology_auto(Path(cfg["topology_json"]),
+                                           mapping={"unit": "meters", "rate": 5.0, "mode": "deterministic"})
+        self.assertEqual(len(t["branches"]), 4)                          # trunk kept as ancestor
+
+    def test_string_shorthand_and_errors(self):
+        seg = write(ROWS); d = seg.parent
+        rfc, cfg, cfgp = self._cfg({"topology_tls": str(seg), "mapping_rate": 5.0}, d)
+        rfc._materialize_tls_topology(cfg, config_path=cfgp)
+        self.assertTrue(Path(cfg["topology_json"]).exists())
+        bad = [({"topology_tls": str(seg), "topology_json": "x.json", "mapping_rate": 5.0}, "not both"),
+               ({"topology_tls": {"segments": str(seg), "organ": "all"}, "mapping_rate": 5.0}, "unknown keys"),
+               ({"topology_tls": {"organs": "all"}, "mapping_rate": 5.0}, "segments"),
+               ({"topology_tls": str(seg), "mapping_unit": "years", "mapping_rate": 5.0}, "meters")]
+        for topo, msg in bad:
+            rfc, cfg, cfgp = self._cfg(topo, d)
+            with self.assertRaisesRegex(ValueError, msg):
+                rfc._materialize_tls_topology(cfg, config_path=cfgp)
+        rfc, cfg, cfgp = self._cfg({"topology_tls": str(d / "missing.txt"), "mapping_rate": 5.0}, d)
+        with self.assertRaises(FileNotFoundError):
+            rfc._materialize_tls_topology(cfg, config_path=cfgp)
+
+    def test_example_config_and_table(self):
+        cfg = json.loads((ROOT / "simSOMA_configs" / "example_tls_tree.json").read_text())
+        seg = ROOT / cfg["topology"]["topology_tls"]["segments"]
+        topo, rep = topology_tls.convert(topology_tls.read_segment_table(seg))
+        self.assertEqual(rep["n_organs"], 17)
+        self.assertEqual(rep["warnings"], [])
+
+
 if __name__ == "__main__":
     unittest.main()

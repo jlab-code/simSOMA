@@ -1,6 +1,6 @@
 # Clonal composition of branch and organ founders (definition `local_sector_v1`)
 
-Applies from simSOMA 0.2.0-dev (branch `revision/code-fixes`). Draft text for the SI.
+Applies from simSOMA 0.2.0. Draft text for the SI.
 
 ## Definition
 At each developmental event the current ASC niche (m ordered positions) is amplified into the

@@ -715,7 +715,8 @@ def _normalize_config(cfg: Dict[str, Any]) -> Dict[str, Any]:
         "outdir_root": run.get("outdir_root"),
         "seed": run.get("seed", 1),
         "topology_json": topology.get("topology_json"),
-        "mapping_unit": topology.get("mapping_unit", "steps"),
+        "topology_tls": topology.get("topology_tls"),
+        "mapping_unit": topology.get("mapping_unit", "meters" if topology.get("topology_tls") is not None else "steps"),
         "mapping_mode": topology.get("mapping_mode", "deterministic"),
         "mapping_rate": topology.get("mapping_rate"),
         "phyllotaxy": topology.get("phyllotaxy"),
@@ -1091,6 +1092,68 @@ def _grid_subset_n_sets(modules: Dict[str, Any], *, grid_subset: Any = None) -> 
         return total_sets
     return int(subset["end_index"]) - int(subset["start_index"]) + 1
 
+
+
+TLS_INPUT_KEYS = {"segments", "organs", "min_axis_length", "prune", "seed"}
+
+
+def _tls_topology_path(cfg: Dict[str, Any], *, config_path: Path) -> Path:
+    outdir_root = _resolve_outdir_root(str(cfg["outdir_root"]), base_dir=config_path.parent)
+    return outdir_root / str(cfg["experiment_name"]) / "topology_input" / "topology_from_tls.json"
+
+
+def _materialize_tls_topology(cfg: Dict[str, Any], *, config_path: Path) -> None:
+    """Input mode topology.topology_tls: convert a TLS / TreeQSM segment table at run time.
+
+    The converted topology (meters) is written to <outdir>/<experiment>/topology_input/topology_from_tls.json
+    together with the conversion report, and cfg["topology_json"] is pointed at it. Conversion is
+    deterministic (seeded), so the check and run steps produce identical topologies.
+    """
+    tls = cfg.get("topology_tls")
+    if tls is None:
+        return
+    if cfg.get("topology_json") is not None:
+        raise ValueError("Give either topology.topology_json or topology.topology_tls, not both.")
+    if isinstance(tls, str):
+        tls = {"segments": tls}
+    if not isinstance(tls, dict):
+        raise ValueError("topology.topology_tls must be a path (string) or an object with at least 'segments'.")
+    unknown = sorted(set(tls) - TLS_INPUT_KEYS)
+    if unknown:
+        raise ValueError(f"topology.topology_tls: unknown keys {unknown}; allowed: {sorted(TLS_INPUT_KEYS)}")
+    if not tls.get("segments"):
+        raise ValueError("topology.topology_tls.segments (path to the segment table) is required.")
+    if str(cfg.get("mapping_unit", "meters")).lower() != "meters":
+        raise ValueError("topology.topology_tls produces a topology in meters: set topology.mapping_unit = 'meters'.")
+    seg_path = _resolve_topology_json_path(str(tls["segments"]), base_dir=config_path.parent)
+    if not seg_path.exists():
+        raise FileNotFoundError(f"topology.topology_tls.segments not found: {seg_path}")
+    organs = tls.get("organs", "all")
+    if isinstance(organs, str) and organs.startswith("@"):
+        organ_file = _resolve_topology_json_path(organs[1:], base_dir=config_path.parent)
+        organs = [int(x) for x in organ_file.read_text(encoding="utf-8").split() if x.strip()]
+    try:
+        min_len = float(tls.get("min_axis_length", 0.0))
+        seed = int(tls.get("seed", 0))
+    except (TypeError, ValueError) as exc:
+        raise ValueError("topology.topology_tls: min_axis_length must be a number and seed an integer.") from exc
+    prune = tls.get("prune", True)
+    if not isinstance(prune, bool):
+        raise ValueError("topology.topology_tls.prune must be true or false.")
+
+    import topology_tls
+    rows = topology_tls.read_segment_table(seg_path)
+    topo, report = topology_tls.convert(rows, organs=organs, min_axis_length=min_len, prune=prune,
+                                        seed=seed, source_name=seg_path.name)
+    report["source_sha256"] = _sha256_file(seg_path)
+    out = _tls_topology_path(cfg, config_path=config_path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(topo, indent=1) + "\n", encoding="utf-8")
+    (out.parent / "tls_conversion_report.json").write_text(json.dumps(report, indent=2) + "\n", encoding="utf-8")
+    for w in report.get("warnings", []):
+        print(f"topology_tls warning: {w}")
+    print(f"topology_tls: {report['n_organs']} organs, {report['n_branches']} branches -> {out}")
+    cfg["topology_json"] = str(out)
 
 
 def _validate_config(cfg: Dict[str, Any]) -> None:
@@ -2416,6 +2479,7 @@ def main(argv=None) -> None:
             "Set topology.mapping_rate instead; the driver will use that value both for topology conversion and as the effective kappa_sr during simulation."
         )
     cfg = _normalize_config(raw_cfg)
+    _materialize_tls_topology(cfg, config_path=config_path)
     _validate_config(cfg)
 
     if args.step == "check":

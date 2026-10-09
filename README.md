@@ -8,8 +8,8 @@ This repository accompanies the paper:
 
 ## Status
 
-Version 0.2.0 (development; release accompanying the revised paper). Changes since 0.1.0-beta are
-listed in `CHANGELOG.md`.
+Version 0.2.0 (release accompanying the revised paper). Changes since 0.1.0-beta are listed in
+`CHANGELOG.md`.
 
 ## Install and command line
 
@@ -22,7 +22,31 @@ simsoma check CONFIG                                       # topology check / pl
 simsoma layers CONFIG                                      # per-layer simulation + read-level observation
 simsoma template layered > layered.json                    # template for `simsoma layers`
 simsoma topology-from-csv branches.csv organs.csv topology.json --unit meters
+simsoma topology-from-tls segments.txt topology.json --organs all    # TLS / TreeQSM segment table
 ```
+
+## Topology input modes
+
+The `topology` block of a config takes exactly one of:
+
+| Input | Config key | Notes |
+|---|---|---|
+| Topology JSON (user or internal format) | `topology_json` | units `steps`, `years` or `meters` (`mapping_unit`) |
+| Branch/organ CSV tables | `topology_json` after `simsoma topology-from-csv` | |
+| TLS / TreeQSM segment table | `topology_tls` | converted at run time; meters; see below |
+
+```json
+"topology": {
+  "topology_tls": {"segments": "simSOMA_inputs/examples/tls_synthetic_segments.txt",
+                   "organs": "all", "min_axis_length": 0.0, "prune": true, "seed": 0},
+  "mapping_unit": "meters", "mapping_rate": 5.0
+}
+```
+
+`topology_tls` may also be a plain path (all tips as organs). The converted topology and the
+conversion report (with the SHA-256 of the segment table) are written to
+`<outdir>/<experiment>/topology_input/`. Example: `simSOMA_configs/example_tls_tree.json`
+(synthetic 50-segment tree).
 
 The shell wrappers in `simSOMA_scripts/` keep working unchanged.
 
@@ -174,5 +198,6 @@ simSOMA is released under the MIT License. See `LICENSE`.
 
 ## Topologies from terrestrial laser scans
 
-`simsoma topology-from-tls SEGMENTS.txt OUT.json --organs random:30` converts a TreeQSM-style segment
-table into a topology in meters; see `simSOMA_docs/tls_topology.md`.
+Segment tables can be used directly as a config input (`topology.topology_tls`, above) or converted
+once with `simsoma topology-from-tls SEGMENTS.txt OUT.json --organs random:30` (topology in meters).
+Conversion rules: `simSOMA_docs/tls_topology.md`.

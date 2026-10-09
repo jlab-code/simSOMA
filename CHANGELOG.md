@@ -1,6 +1,16 @@
 # Changelog
 
-## Unreleased (0.2.0-dev) — revision code fixes (branch `revision/code-fixes`)
+## 0.2.0 — 2026-10-09 (release accompanying the revised paper)
+
+- **TLS segment tables as a topology input mode.** `topology.topology_tls` in a config converts a
+  TreeQSM-style segment table at run time (same rules as `simsoma topology-from-tls`; organ
+  selection, minimum axis length, pruning, seed). Works for `check`, `run` and `run --splits`
+  (converted once, split runs read the converted JSON). Converted topology and report (with the
+  segment table's SHA-256) go to `<outdir>/<experiment>/topology_input/`. Example config uses a
+  synthetic 50-segment table (`simSOMA_inputs/examples/tls_synthetic_segments.txt`). 43 tests.
+- **TLS converter** `simsoma topology-from-tls` (topology_tls 1.0.0; `simSOMA_docs/tls_topology.md`).
+
+### Revision code fixes (branch `revision/code-fixes`)
 
 Fixes agreed 2026-10-07 during the manuscript revision. Paper-relevant notes in brackets.
 
