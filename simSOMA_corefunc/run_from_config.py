@@ -70,6 +70,14 @@ TOPOLOGY_OUTPUT_FIELDS = [
     "effective_kappa_sr",
 ]
 
+REALIZED_EVENT_TRUTH_FIELDS = [
+    "set_id", "set_label", "rep", "seed", "event_type", "event_id",
+    "parent_branch_id", "target_id", "founder_sector_count",
+    "founder_effective_sectors", "founder_diversity",
+    "founder_dominant_fraction", "founder_lineage_counts_json",
+    *TOPOLOGY_OUTPUT_FIELDS, *OUTPUT_PARAM_FIELDS,
+]
+
 MODULE_PARAM_FIELDS = {
     "self_renewal": SELF_RENEWAL_FIELDS,
     "pre_branching": PRE_BRANCHING_FIELDS,
@@ -671,6 +679,10 @@ def _normalize_config(cfg: Dict[str, Any]) -> Dict[str, Any]:
     topology = cfg.get("topology", {})
     check = cfg.get("check", {})
     simulation = cfg.get("simulation", {})
+    observation_model = cfg.get("observation_model")
+    export_fitsoma_observation = bool(
+        isinstance(observation_model, dict) and observation_model.get("export_fitsoma", False)
+    )
 
     return {
         "experiment_name": run.get("experiment_name"),
@@ -688,7 +700,9 @@ def _normalize_config(cfg: Dict[str, Any]) -> Dict[str, Any]:
         "vaf_nbins": simulation.get("vaf_nbins", 20),
         "summary_private_shared": simulation.get("summary_private_shared", True),
         "store_full_results": simulation.get("store_full_results", True),
-        "export_raw_vafs": simulation.get("export_raw_vafs", False),
+        "export_raw_vafs": bool(simulation.get("export_raw_vafs", False) or export_fitsoma_observation),
+        "export_realized_event_truth": bool(simulation.get("export_realized_event_truth", False) or export_fitsoma_observation),
+        "observation_model": observation_model,
         # Current compact output profile:
         # - sharing summaries are retained by default because they are central diagnostics;
         # - exact allele-count VAF spectra are retained by default because they are re-binnable;
@@ -1090,6 +1104,11 @@ def _validate_config(cfg: Dict[str, Any]) -> None:
     phyllotaxy_cfg = cfg.get("phyllotaxy")
     if phyllotaxy_cfg is not None and not isinstance(phyllotaxy_cfg, dict):
         raise ValueError("topology.phyllotaxy must be a JSON object if provided.")
+
+    observation_model = cfg.get("observation_model")
+    if observation_model is not None:
+        from configured_observation_model import normalize_observation_model_config
+        normalize_observation_model_config(observation_model)
 
     mode = str(cfg["simulation_mode"]).lower()
     if mode != "grid_parameter":
@@ -1575,6 +1594,47 @@ def _raw_vaf_rows_for_sim(
 
 
 
+def _realized_event_truth_rows_for_sim(
+    *,
+    set_id: str,
+    set_label: str,
+    rep: int,
+    seed: int | None,
+    result: Dict[str, Any],
+    cfg: Dict[str, Any],
+    params: Dict[str, Any],
+) -> List[Dict[str, Any]]:
+    rows: List[Dict[str, Any]] = []
+    base: Dict[str, Any] = {
+        "set_id": set_id,
+        "set_label": set_label,
+        "rep": int(rep),
+        "seed": seed,
+        **_topology_row(cfg),
+    }
+    for k in OUTPUT_PARAM_FIELDS:
+        base[k] = _display_param_value(params.get(k))
+    for event_type, events in (("branch", result.get("branch_events", [])), ("organ", result.get("organ_events", []))):
+        for ev in events or []:
+            if not isinstance(ev, dict):
+                continue
+            event_id = ev.get("child_id") if event_type == "branch" else ev.get("organ_id")
+            counts = ev.get("founder_lineage_counts", {})
+            rows.append({
+                **base,
+                "event_type": event_type,
+                "event_id": event_id,
+                "parent_branch_id": ev.get("branch_id"),
+                "target_id": event_id,
+                "founder_sector_count": int(ev.get("founder_sector_count", 0)),
+                "founder_effective_sectors": float(ev.get("founder_effective_sectors", 0.0)),
+                "founder_diversity": float(ev.get("founder_diversity", 0.0)),
+                "founder_dominant_fraction": float(ev.get("founder_dominant_fraction", 0.0)),
+                "founder_lineage_counts_json": json.dumps(counts, sort_keys=True),
+            })
+    return rows
+
+
 def _bin_edge_row(bin_index: int, nbins: int) -> Dict[str, Any]:
     return {
         "bin_index": int(bin_index),
@@ -1938,6 +1998,7 @@ def _run_grid_step(*, cfg: Dict[str, Any], raw_cfg: Dict[str, Any], config_path:
 
     store_full = bool(cfg.get("store_full_results", False))
     export_raw_vafs = bool(cfg.get("export_raw_vafs", False))
+    export_realized_event_truth = bool(cfg.get("export_realized_event_truth", False))
     export_sharing_summaries = bool(cfg.get("export_sharing_summaries", True))
     export_replicate_sharing_summaries = bool(cfg.get("export_replicate_sharing_summaries", False))
     export_vaf_count_spectra = bool(cfg.get("export_vaf_count_spectra", True))
@@ -1977,6 +2038,12 @@ def _run_grid_step(*, cfg: Dict[str, Any], raw_cfg: Dict[str, Any], config_path:
         writers["vaf_count_spectrum_replicate_summaries"] = make_writer("vaf_count_spectrum_replicate_summaries.csv.gz", "vaf_count_spectrum_summaries")
     if export_raw_vafs:
         writers["raw_vafs"] = make_writer("raw_vafs.csv.gz", "raw_vafs")
+    if export_realized_event_truth:
+        writers["realized_event_truth"] = _StreamingCsvWriter(
+            grid_dir / "realized_event_truth.csv.gz",
+            kind="realized_event_truth",
+            fieldnames=REALIZED_EVENT_TRUTH_FIELDS,
+        )
 
     total_sets_full = _grid_total_n_sets(cfg["modules"])
     subset_info = _normalize_grid_subset(cfg.get("grid_subset"), total_sets=total_sets_full)
@@ -2126,6 +2193,19 @@ def _run_grid_step(*, cfg: Dict[str, Any], raw_cfg: Dict[str, Any], config_path:
                         )
                     )
 
+                if export_realized_event_truth and isinstance(sim.get("result"), dict):
+                    writers["realized_event_truth"].write_rows(
+                        _realized_event_truth_rows_for_sim(
+                            set_id=set_id,
+                            set_label=set_label,
+                            rep=rep_abs,
+                            seed=seed,
+                            result=sim["result"],
+                            cfg=cfg,
+                            params=params_eff,
+                        )
+                    )
+
                 if not store_full:
                     result_json.unlink(missing_ok=True)
                 del payload, run_entry, sims, sim, summ
@@ -2204,6 +2284,7 @@ def _run_grid_step(*, cfg: Dict[str, Any], raw_cfg: Dict[str, Any], config_path:
         "store_full_results": store_full,
         "full_results_layout": "one_json_per_parameter_set_and_replicate" if store_full else None,
         "export_raw_vafs": export_raw_vafs,
+        "export_realized_event_truth": export_realized_event_truth,
         "export_sharing_summaries": export_sharing_summaries,
         "export_replicate_sharing_summaries": export_replicate_sharing_summaries,
         "export_vaf_count_spectra": export_vaf_count_spectra,
@@ -2253,6 +2334,8 @@ def _run_grid_step(*, cfg: Dict[str, Any], raw_cfg: Dict[str, Any], config_path:
         print(f"vaf_count_spectrum_replicate_summaries_csv_gz: {grid_dir / 'vaf_count_spectrum_replicate_summaries.csv.gz'}")
     if export_raw_vafs:
         print(f"raw_vafs_csv_gz: {grid_dir / 'raw_vafs.csv.gz'}")
+    if export_realized_event_truth:
+        print(f"realized_event_truth_csv_gz: {grid_dir / 'realized_event_truth.csv.gz'}")
     if subset_info is not None:
         print(f"grid_subset: {subset_info['start_index']}..{subset_info['end_index']} of {total_sets_full}")
     print(f"n_parameter_sets: {total_sets_selected}")
@@ -2289,6 +2372,10 @@ def main() -> None:
         return
 
     _run_grid_step(cfg=cfg, raw_cfg=raw_cfg, config_path=config_path, pipeline_dir=pipeline_dir)
+    if raw_cfg.get("observation_model") is not None:
+        from configured_observation_model import run_configured_observation_model
+        outdir_root = _resolve_outdir_root(str(cfg["outdir_root"]), base_dir=config_path.parent)
+        run_configured_observation_model(outdir_root / str(cfg["experiment_name"]), raw_cfg)
 
 
 if __name__ == "__main__":

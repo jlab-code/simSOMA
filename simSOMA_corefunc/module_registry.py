@@ -13,6 +13,7 @@ import self_renewal as _sr
 import pre_branching as _pre
 import branching as _br
 import organ as _org
+from founder_diversity import summarize_founder_lineages
 
 
 class DefaultSelfRenewalAdapter:
@@ -92,6 +93,7 @@ class DefaultBranchingAdapter:
             rng=rng,
             focal_index=(int(focal_index) if focal_index is not None else None),
         )
+        founder = summarize_founder_lineages(sel.expanded_state, int(niche_size_m))
         return {
             'branch_id': sel.branch_id,
             'child_id': sel.child_id,
@@ -107,6 +109,7 @@ class DefaultBranchingAdapter:
             'precursor_wraparound': bool(sel.precursor_wraparound),
             'precursor_min_index': sel.precursor_min_index,
             'precursor_max_index': sel.precursor_max_index,
+            **founder,
         }
 
 
@@ -158,6 +161,11 @@ class DefaultOrganAdapter:
             'precursor_min_index': org_ev.precursor_min_index,
             'precursor_max_index': org_ev.precursor_max_index,
             'max_dev_depth': int(org_ev.max_dev_depth),
+            'founder_lineage_counts': {int(k): int(v) for k, v in org_ev.founder_lineage_counts.items()},
+            'founder_sector_count': int(org_ev.founder_sector_count),
+            'founder_effective_sectors': float(org_ev.founder_effective_sectors),
+            'founder_diversity': float(org_ev.founder_diversity),
+            'founder_dominant_fraction': float(org_ev.founder_dominant_fraction),
         }
 
 

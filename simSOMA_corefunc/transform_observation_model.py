@@ -44,7 +44,7 @@ import re
 import shutil
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Any, Mapping
 
 import numpy as np
 import pandas as pd
@@ -591,6 +591,317 @@ def run_observation_model_transform(
         "metadata": metadata,
     }
 
+
+
+# -----------------------------------------------------------------------------
+# Public mutation-level VAF transformation API
+# -----------------------------------------------------------------------------
+# This API extends the original aggregated-spectrum post-processing functions
+# above.  The original run_observation_model_transform() function and CLI are
+# intentionally preserved for backward compatibility.
+
+VAF_TRANSFORMATION_API_VERSION = "0.2.0"
+VALID_MUTATION_SAMPLING_MODES = {"bulk", "layer_enriched", "layer_specific"}
+VALID_READ_MODELS = {"binomial", "beta_binomial"}
+
+
+def get_vaf_transformation_capabilities() -> dict[str, Any]:
+    """Return the stable capabilities exposed to external clients such as fitSOMA."""
+    return {
+        "api_version": VAF_TRANSFORMATION_API_VERSION,
+        "mutation_level": True,
+        "sampling_modes": sorted(VALID_MUTATION_SAMPLING_MODES),
+        "phase_modes": sorted(VALID_PHASE_MODES),
+        "read_models": sorted(VALID_READ_MODELS),
+        "caller_emulation": True,
+        "called_any_ascertainment": True,
+        "ubiquitous_filtering": False,
+        "note": (
+            "Ubiquitous-variant filtering and topology-aware summary construction are "
+            "analysis operations and remain outside this generative transformation API."
+        ),
+    }
+
+
+def _parameter_value(value: Any) -> float:
+    """Accept either a scalar or an inference-ready {value: ...} parameter block."""
+    if isinstance(value, Mapping):
+        if "value" not in value:
+            raise ValueError("Parameter dictionaries must contain a 'value' field")
+        value = value["value"]
+    return float(value)
+
+
+def _normalize_mutation_observation_config(config: Mapping[str, Any] | None) -> dict[str, Any]:
+    cfg = dict(config or {})
+    assay = dict(cfg.get("assay", {}))
+    assay.setdefault("source_layer", "L2")
+
+    read_model = dict(cfg.get("read_model", {}))
+    read_model.setdefault("type", "beta_binomial")
+    read_model.setdefault("sequencing_error", 0.001)
+    read_model.setdefault("concentration", 200.0)
+
+    depth_model = dict(cfg.get("depth_model", {}))
+    depth_model.setdefault("mode", "sample_design")
+    depth_model.setdefault("default_mean", 100.0)
+    depth_model.setdefault("default_sd", 15.0)
+    depth_model.setdefault("minimum", 1)
+
+    caller = dict(cfg.get("caller", {}))
+    caller.setdefault("min_depth", 20)
+    caller.setdefault("min_alt_reads", 3)
+    caller.setdefault("min_observed_vaf", 0.0)
+
+    ascertainment = dict(cfg.get("ascertainment", {}))
+    ascertainment.setdefault("retain_called_any", True)
+
+    if read_model["type"] not in VALID_READ_MODELS:
+        raise ValueError(f"read_model.type must be one of {sorted(VALID_READ_MODELS)}")
+    eps = _parameter_value(read_model["sequencing_error"])
+    if not (0.0 <= eps < 0.5):
+        raise ValueError("read_model.sequencing_error must be in [0,0.5)")
+    concentration = _parameter_value(read_model["concentration"])
+    if concentration <= 0:
+        raise ValueError("read_model.concentration must be >0")
+    if int(depth_model["minimum"]) < 0:
+        raise ValueError("depth_model.minimum must be >=0")
+    if int(caller["min_depth"]) < 0 or int(caller["min_alt_reads"]) < 0:
+        raise ValueError("caller depth/read thresholds must be >=0")
+    if not (0.0 <= float(caller["min_observed_vaf"]) <= 1.0):
+        raise ValueError("caller.min_observed_vaf must be in [0,1]")
+
+    return {
+        "assay": assay,
+        "read_model": read_model,
+        "depth_model": depth_model,
+        "caller": caller,
+        "ascertainment": ascertainment,
+    }
+
+
+def _source_layer_weight(row: pd.Series, source_layer: str) -> float | None:
+    candidates = [
+        f"{source_layer}_weight",
+        f"weight_{source_layer}",
+        f"{source_layer.lower()}_weight",
+        f"weight_{source_layer.lower()}",
+    ]
+    for col in candidates:
+        if col in row.index and pd.notna(row[col]):
+            return float(row[col])
+    return None
+
+
+def _prepare_mutation_sample_design(
+    sample_design: pd.DataFrame,
+    *,
+    source_layer: str,
+) -> pd.DataFrame:
+    required = {"sample_id", "topology_sample_id", "sampling_mode", "phase_mode"}
+    missing = sorted(required - set(sample_design.columns))
+    if missing:
+        raise ValueError(f"sample_design missing columns: {missing}")
+    design = sample_design.copy()
+    design["sample_id"] = design["sample_id"].astype(str)
+    design["topology_sample_id"] = design["topology_sample_id"].astype(str)
+    if design["sample_id"].duplicated().any():
+        raise ValueError("sample_design.sample_id values must be unique")
+
+    contributions: list[float] = []
+    for _, row in design.iterrows():
+        sampling = str(row["sampling_mode"]).strip().lower()
+        phase = str(row["phase_mode"]).strip().lower()
+        if sampling not in VALID_MUTATION_SAMPLING_MODES:
+            raise ValueError(
+                f"Unsupported sampling_mode {sampling!r}; expected one of "
+                f"{sorted(VALID_MUTATION_SAMPLING_MODES)}"
+            )
+        if phase not in VALID_PHASE_MODES:
+            raise ValueError(f"Unsupported phase_mode {phase!r}")
+
+        if "effective_layer_contribution" in design.columns and pd.notna(row.get("effective_layer_contribution")):
+            contribution = float(row["effective_layer_contribution"])
+        elif sampling == "layer_specific":
+            target = str(row.get("target_layer", source_layer) or source_layer)
+            contribution = 1.0 if target == source_layer else 0.0
+        else:
+            weight = _source_layer_weight(row, source_layer)
+            if weight is None:
+                raise ValueError(
+                    f"Sample {row['sample_id']!r} uses {sampling!r} sampling but has no "
+                    f"effective_layer_contribution or {source_layer}_weight column"
+                )
+            contribution = weight
+        if not (0.0 <= contribution <= 1.0):
+            raise ValueError("effective layer contributions must be in [0,1]")
+        contributions.append(contribution)
+
+    design["sampling_mode"] = design["sampling_mode"].astype(str).str.lower()
+    design["phase_mode"] = design["phase_mode"].astype(str).str.lower()
+    design["effective_layer_contribution"] = contributions
+    return design
+
+
+def _latent_mutation_matrix(
+    latent_mutations: pd.DataFrame,
+    sample_design: pd.DataFrame,
+) -> tuple[list[str], np.ndarray]:
+    required = {"mutation_id", "topology_sample_id", "latent_vaf"}
+    missing = sorted(required - set(latent_mutations.columns))
+    if missing:
+        raise ValueError(f"latent_mutations missing columns: {missing}")
+    latent = latent_mutations.copy()
+    latent["mutation_id"] = latent["mutation_id"].astype(str)
+    latent["topology_sample_id"] = latent["topology_sample_id"].astype(str)
+    latent["latent_vaf"] = pd.to_numeric(latent["latent_vaf"], errors="raise")
+    if not latent["latent_vaf"].between(0.0, 1.0).all():
+        raise ValueError("latent_vaf values must be in [0,1]")
+    mutation_ids = sorted(latent["mutation_id"].unique())
+    topo_samples = sample_design["topology_sample_id"].tolist()
+    pivot = latent.pivot_table(
+        index="mutation_id",
+        columns="topology_sample_id",
+        values="latent_vaf",
+        aggfunc="max",
+        fill_value=0.0,
+    ).reindex(index=mutation_ids, columns=topo_samples, fill_value=0.0)
+    return mutation_ids, pivot.to_numpy(dtype=float)
+
+
+def _draw_mutation_depths(
+    design: pd.DataFrame,
+    config: Mapping[str, Any],
+    n_mutations: int,
+    rng: np.random.Generator,
+) -> np.ndarray:
+    dm = config["depth_model"]
+    mode = str(dm.get("mode", "sample_design"))
+    minimum = int(dm.get("minimum", 1))
+    out = np.empty((n_mutations, len(design)), dtype=int)
+    for col, row in enumerate(design.itertuples(index=False)):
+        row_mean = getattr(row, "depth_mean", np.nan)
+        row_sd = getattr(row, "depth_sd", np.nan)
+        if mode == "fixed":
+            mean = float(dm.get("default_mean", 100.0) if pd.isna(row_mean) else row_mean)
+            values = np.repeat(int(round(mean)), n_mutations)
+        elif mode == "sample_design":
+            mean = float(dm.get("default_mean", 100.0) if pd.isna(row_mean) else row_mean)
+            sd = float(dm.get("default_sd", 15.0) if pd.isna(row_sd) else row_sd)
+            if sd <= 0:
+                values = np.repeat(int(round(mean)), n_mutations)
+            else:
+                values = np.rint(rng.normal(mean, sd, size=n_mutations)).astype(int)
+        else:
+            raise ValueError(f"Unsupported depth_model.mode: {mode!r}")
+        out[:, col] = np.maximum(values, minimum)
+    return out
+
+
+def transform_vaf_observations(
+    latent_mutations: pd.DataFrame,
+    sample_design: pd.DataFrame,
+    observation_config: Mapping[str, Any] | None = None,
+    *,
+    seed: int,
+) -> tuple[pd.DataFrame, dict[str, Any]]:
+    """Transform latent mutation VAFs into empirical-style read evidence.
+
+    This is the mutation-level extension of simSOMA's existing VAF observation
+    transform.  It combines assay sampling, phasing, depth/read sampling, caller
+    emulation, and called-in-any-sample ascertainment.  It deliberately does not
+    remove ubiquitous variants or calculate fitSOMA summaries.
+    """
+    cfg = _normalize_mutation_observation_config(observation_config)
+    design = _prepare_mutation_sample_design(
+        sample_design, source_layer=str(cfg["assay"]["source_layer"])
+    )
+    mutation_ids, latent_matrix = _latent_mutation_matrix(latent_mutations, design)
+    n_mut, n_samples = latent_matrix.shape
+    rng = np.random.default_rng(int(seed))
+
+    contribution = design["effective_layer_contribution"].to_numpy(dtype=float)
+    phase = np.asarray([_phase_factor(x) for x in design["phase_mode"]], dtype=float)
+    assay_matrix = np.clip(latent_matrix * contribution[None, :] * phase[None, :], 0.0, 1.0)
+
+    eps = _parameter_value(cfg["read_model"]["sequencing_error"])
+    read_probability = np.clip(
+        assay_matrix * (1.0 - eps) + (1.0 - assay_matrix) * eps, 0.0, 1.0
+    )
+    depth = _draw_mutation_depths(design, cfg, n_mut, rng)
+
+    read_type = str(cfg["read_model"]["type"])
+    if read_type == "binomial":
+        alt = rng.binomial(depth, read_probability)
+    else:
+        concentration = _parameter_value(cfg["read_model"]["concentration"])
+        safe_p = np.clip(read_probability, 1e-10, 1.0 - 1e-10)
+        locus_p = rng.beta(safe_p * concentration, (1.0 - safe_p) * concentration)
+        alt = rng.binomial(depth, locus_p)
+
+    observed_vaf = np.divide(
+        alt, depth, out=np.zeros_like(alt, dtype=float), where=depth > 0
+    )
+    caller = cfg["caller"]
+    callable_mask = depth >= int(caller["min_depth"])
+    called = (
+        callable_mask
+        & (alt >= int(caller["min_alt_reads"]))
+        & (observed_vaf >= float(caller["min_observed_vaf"]))
+    )
+    status = np.full(called.shape, "BELOW_CALL_THRESHOLD", dtype=object)
+    status[~callable_mask] = "NO_COVERAGE"
+    status[called] = "CALLED"
+
+    rows: list[dict[str, Any]] = []
+    for i, mutation_id in enumerate(mutation_ids):
+        for s, sample in enumerate(design.itertuples(index=False)):
+            rows.append({
+                "mutation_id": str(mutation_id),
+                "sample_id": str(sample.sample_id),
+                "topology_sample_id": str(sample.topology_sample_id),
+                "sampling_mode": str(sample.sampling_mode),
+                "phase_mode": str(sample.phase_mode),
+                "effective_layer_contribution": float(sample.effective_layer_contribution),
+                "latent_vaf": float(latent_matrix[i, s]),
+                "assay_vaf": float(assay_matrix[i, s]),
+                "read_probability": float(read_probability[i, s]),
+                "alt_count": int(alt[i, s]),
+                "ref_count": int(depth[i, s] - alt[i, s]),
+                "depth": int(depth[i, s]),
+                "observed_vaf": float(observed_vaf[i, s]) if depth[i, s] > 0 else np.nan,
+                "callable": bool(callable_mask[i, s]),
+                "caller_call": bool(called[i, s]),
+                "caller_status": str(status[i, s]),
+            })
+    evidence = pd.DataFrame(rows)
+    n_before = int(evidence["mutation_id"].nunique()) if not evidence.empty else 0
+    if bool(cfg["ascertainment"].get("retain_called_any", True)) and not evidence.empty:
+        called_any = evidence.groupby("mutation_id")["caller_call"].transform("any")
+        evidence = evidence.loc[called_any].reset_index(drop=True)
+    n_after = int(evidence["mutation_id"].nunique()) if not evidence.empty else 0
+
+    metadata = {
+        "transform_type": "simSOMA_mutation_level_vaf_transformation",
+        "api_version": VAF_TRANSFORMATION_API_VERSION,
+        "created_utc": _now_iso(),
+        "seed": int(seed),
+        "source_layer": str(cfg["assay"]["source_layer"]),
+        "sampling_modes": sorted(design["sampling_mode"].unique().tolist()),
+        "phase_modes": sorted(design["phase_mode"].unique().tolist()),
+        "read_model": str(cfg["read_model"]["type"]),
+        "sequencing_error": eps,
+        "read_concentration": _parameter_value(cfg["read_model"]["concentration"]),
+        "depth_model": dict(cfg["depth_model"]),
+        "caller": dict(cfg["caller"]),
+        "ascertainment": dict(cfg["ascertainment"]),
+        "n_samples": int(n_samples),
+        "n_latent_mutations": n_before,
+        "n_candidates_called_any": n_after,
+        "complete_mutation_by_sample_matrix": True,
+        "ubiquitous_filter_applied": False,
+    }
+    return evidence, metadata
 
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(

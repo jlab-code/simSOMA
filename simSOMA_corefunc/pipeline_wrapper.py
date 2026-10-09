@@ -384,6 +384,11 @@ def run_pipeline(
                     "precursor_wraparound": bool(sel.get("precursor_wraparound", False)),
                     "precursor_min_index": sel.get("precursor_min_index"),
                     "precursor_max_index": sel.get("precursor_max_index"),
+                    "founder_lineage_counts": dict(sel.get("founder_lineage_counts", {})),
+                    "founder_sector_count": int(sel.get("founder_sector_count", 0)),
+                    "founder_effective_sectors": float(sel.get("founder_effective_sectors", 0.0)),
+                    "founder_diversity": float(sel.get("founder_diversity", 0.0)),
+                    "founder_dominant_fraction": float(sel.get("founder_dominant_fraction", 0.0)),
                 }
                 if phyllo_site_id is not None:
                     be["phyllo_site_id"] = str(phyllo_site_id)

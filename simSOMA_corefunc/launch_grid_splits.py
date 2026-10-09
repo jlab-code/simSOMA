@@ -33,6 +33,7 @@ REPLICATE_FEATURE_GZ_FILES = [
     "vaf_count_spectrum_replicate_summaries.csv.gz",
 ]
 RAW_VAF_FILE = "raw_vafs.csv.gz"
+REALIZED_EVENT_FILE = "realized_event_truth.csv.gz"
 
 
 def _resolve_path(value: str, *, base_dir: Path) -> Path:
@@ -160,6 +161,7 @@ def _merge_split_outputs_parameter_streaming(
     for filename in REPLICATE_FEATURE_GZ_FILES:
         _concat_csv_stream([d / "grid_parameter" / filename for d in split_run_dirs], master_grid_dir / filename)
     _concat_csv_stream([d / "grid_parameter" / RAW_VAF_FILE for d in split_run_dirs], master_grid_dir / RAW_VAF_FILE)
+    _concat_csv_stream([d / "grid_parameter" / REALIZED_EVENT_FILE for d in split_run_dirs], master_grid_dir / REALIZED_EVENT_FILE)
 
     full_results_dst = master_grid_dir / "full_results"
     _merge_full_results_parameter(split_run_dirs=split_run_dirs, full_results_dst=full_results_dst)
@@ -243,6 +245,8 @@ def _sort_rows(rows: List[Dict[str, Any]], kind: str) -> List[Dict[str, Any]]:
         return sorted(rows, key=lambda r: (set_num(r), organ_key(r), rep_num(r)))
     if kind == "organ_aggregated_summaries":
         return sorted(rows, key=lambda r: (set_num(r), organ_key(r)))
+    if kind == "realized_event_truth":
+        return sorted(rows, key=lambda r: (set_num(r), rep_num(r), str(r.get("event_type", "")), str(r.get("event_id", ""))))
     if kind == "vaf_class_aggregated_summaries":
         return sorted(rows, key=lambda r: (set_num(r), str(r.get("level", "")), organ_key(r), str(r.get("variant_class", "")), _as_int(r.get("bin_index"), 0)))
     if kind == "sharing_aggregated_summaries":
@@ -492,9 +496,11 @@ def _merge_split_outputs(
         "sharing_replicate_summaries": [],
         "vaf_count_spectrum_replicate_summaries": [],
         "raw_vafs": [],
+        "realized_event_truth": [],
     }
     fieldnames: Dict[str, List[str]] = {k: [] for k in merged_rows}
     saw_raw_vafs = False
+    saw_realized_event_truth = False
     saw_optional: Dict[str, bool] = {k: False for k in merged_rows}
 
     for split_run_dir in split_run_dirs:
@@ -534,6 +540,13 @@ def _merge_split_outputs(
         for fn in raw_fns:
             if fn not in fieldnames["raw_vafs"]:
                 fieldnames["raw_vafs"].append(fn)
+        event_fns, event_rows = _read_csv_rows(split_grid_dir / REALIZED_EVENT_FILE)
+        if event_rows:
+            saw_realized_event_truth = True
+            merged_rows["realized_event_truth"].extend(event_rows)
+        for fn in event_fns:
+            if fn not in fieldnames["realized_event_truth"]:
+                fieldnames["realized_event_truth"].append(fn)
 
     n_sim_total = int(master_cfg["simulation"].get("n_sim", 1))
     param_rows = _dedupe_parameter_rows(merged_rows["parameter_sets"], n_sim_total=n_sim_total)
@@ -546,6 +559,11 @@ def _merge_split_outputs(
         _ensure_unique(raw_rows, kind="raw_vafs", key_fields=("set_id", "organ_id", "rep", "mutation_id"))
     else:
         raw_rows = []
+    if saw_realized_event_truth:
+        realized_event_rows = _sort_rows(merged_rows["realized_event_truth"], "realized_event_truth")
+        _ensure_unique(realized_event_rows, kind="realized_event_truth", key_fields=("set_id", "rep", "event_type", "event_id"))
+    else:
+        realized_event_rows = []
 
     if split_axis == "parameter":
         agg_rows = _sort_rows(merged_rows["aggregated_summaries"], "aggregated_summaries")
@@ -592,6 +610,9 @@ def _merge_split_outputs(
     if saw_raw_vafs:
         ordered = rfc._ordered_fieldnames("raw_vafs", raw_rows) if raw_rows else fieldnames["raw_vafs"]
         _write_csv(master_grid_dir / RAW_VAF_FILE, raw_rows, ordered)
+    if saw_realized_event_truth:
+        ordered = fieldnames["realized_event_truth"]
+        _write_csv(master_grid_dir / REALIZED_EVENT_FILE, realized_event_rows, ordered)
 
     full_results_dst = master_grid_dir / "full_results"
     if split_axis == "parameter":
@@ -721,6 +742,13 @@ def main() -> None:
         child_cfg["run"]["outdir_root"] = str(raw_cfg["run"]["outdir_root"])
         child_cfg["topology"]["topology_json"] = str(raw_cfg["topology"]["topology_json"])
         child_cfg.setdefault("simulation", {})
+        master_observation = raw_cfg.get("observation_model")
+        if isinstance(master_observation, dict):
+            # Observation post-processing occurs once after the split outputs are merged.
+            child_cfg.pop("observation_model", None)
+            if bool(master_observation.get("export_fitsoma", False)):
+                child_cfg["simulation"]["export_raw_vafs"] = True
+                child_cfg["simulation"]["export_realized_event_truth"] = True
         if args.split_axis == "parameter":
             child_cfg["simulation"]["grid_subset"] = {
                 "start_index": int(start_idx),
@@ -825,6 +853,12 @@ def main() -> None:
         split_axis=args.split_axis,
     )
     print(f"Merged outputs written to: {merged_dir}")
+
+    if raw_cfg.get("observation_model") is not None:
+        from configured_observation_model import run_configured_observation_model
+        report = run_configured_observation_model(merged_dir.parent, raw_cfg)
+        if report is not None:
+            print(f"Observation-model outputs written to: {report['scenario_dir']}")
 
     if args.cleanup_splits:
         _cleanup_split_workspace(split_root=split_root, split_run_dirs=split_run_dirs, merged_dir=merged_dir)

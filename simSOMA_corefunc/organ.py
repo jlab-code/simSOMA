@@ -12,6 +12,7 @@ import numpy as np
 
 from self_renewal import CellState, SelfRenewalParams, Time2D
 from recruitment_utils import allocate_equalized_quotas, expand_founders_to_exact_leaves, select_contiguous_precursors
+from founder_diversity import summarize_founder_lineages
 
 
 @dataclass(frozen=True)
@@ -48,6 +49,11 @@ class OrganEvent:
     precursor_min_index: int | None
     precursor_max_index: int | None
     max_dev_depth: int
+    founder_lineage_counts: Dict[int, int]
+    founder_sector_count: int
+    founder_effective_sectors: float
+    founder_diversity: float
+    founder_dominant_fraction: float
 
 
 
@@ -127,6 +133,7 @@ def run_organ_event(
 
     allele_counts = _compute_allele_counts_from_genotypes([c.genotype for c in sampled])
     max_depth = max(leaf_depths) if leaf_depths else 0
+    founder = summarize_founder_lineages(leaves, int(params.m))
 
     return OrganEvent(
         organ_id=str(inputs.organ_id),
@@ -150,4 +157,9 @@ def run_organ_event(
         precursor_min_index=recruitment.min_index,
         precursor_max_index=recruitment.max_index,
         max_dev_depth=int(max_depth),
+        founder_lineage_counts=founder["founder_lineage_counts"],
+        founder_sector_count=founder["founder_sector_count"],
+        founder_effective_sectors=founder["founder_effective_sectors"],
+        founder_diversity=founder["founder_diversity"],
+        founder_dominant_fraction=founder["founder_dominant_fraction"],
     )

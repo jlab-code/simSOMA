@@ -88,6 +88,40 @@ N_SPLITS=4 N_PARALLEL_JOBS=2 RUN_CHECK=yes \
   bash simSOMA_scripts/run_config_local.sh simSOMA_configs/simulation_04_organ_formation_rough.json
 ```
 
+## Optional observation model
+
+An ordinary simSOMA config may include a top-level `observation_model` block. The
+developmental simulation still runs through the standard local or split workflow; the
+observation transform is applied only after the normal outputs have been completed.
+
+Two modes are available:
+
+- `deterministic`: exact layer/tissue/phasing transformation without stochastic read noise.
+- `read_counts`: deterministic assay transformation followed by depth/read sampling,
+  sequencing error, callability, and caller emulation.
+
+If the block is absent, simSOMA retains the legacy Git behavior and creates no observation
+outputs. A deterministic identity configuration (`layer_equivalent`, weight 1,
+layer-specific, phased) reproduces the original noiseless VAFs while optionally exporting
+a complete fitSOMA handoff.
+
+Runnable examples:
+
+```text
+simSOMA_configs/example_observation_deterministic.json
+simSOMA_configs/example_observation_read_counts.json
+simSOMA_configs/example_observation_split.json
+```
+
+Run them through the existing wrapper:
+
+```bash
+bash simSOMA_scripts/run_config_local.sh simSOMA_configs/example_observation_deterministic.json
+```
+
+Detailed schema and output documentation are in
+`simSOMA_docs/observation_model_config.md`.
+
 ## Full tutorial
 
 The full tutorial is maintained outside the core code repository because it is updated frequently.
