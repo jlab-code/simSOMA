@@ -53,7 +53,7 @@ starting point, not estimates for a particular species or tissue: adapt them to 
 | Setting | Template value | Basis |
 |---|---|---|
 | `layer_contributions` | L1 0.13, L2 0.84, L3 0.03 | mean of the three quantitative leaf compositions below, each rescaled to L1 + L2 + L3 = 1 |
-| `simulation.layers.*.mu_unit` | L1 0.95, L2 0.55, L3 0.55 | illustrative relative values: L1 accumulates more mutations than the inner layers (Goel et al. 2024; Amundson et al. 2025) |
+| `simulation.layers.*.mu_unit` | L1 0.95, L2 0.55, L3 0.55 | relative per-layer rates following Goel et al. (2024), who found a higher mutation load in L1 than in L2 (see also Amundson et al. 2025) |
 
 Quantitative leaf compositions (L1 = epidermis, L2 = mesophyll, L3 = vasculature):
 
@@ -78,6 +78,10 @@ studies give an L2 share of 0.82-0.85; allowing for species differences, a conse
 about 0.60-0.85. A fixed heterozygous L2 mutation in unphased bulk leaf DNA is then expected at VAF
 0.5 x c_L2, i.e. about 0.30-0.43 (0.42 with the template value). In woody species (willow), leaf
 somatic mutations are mostly found below VAF 0.3.
+
+Reference for the per-layer mutation rates: Goel M, Campoy JA, Krause K, Baus LC, Sahu A, Sun H,
+Walkemeier B, Marek M, Beaudry R, Ruiz D, Huettel B, Schneeberger K (2024). The vast majority of
+somatic mutations in plants are layer-specific. *Genome Biology* 25:194.
 
 ## Outputs
 

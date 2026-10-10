@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3 — 2026-10-10 (documentation; simulation results unchanged)
+
+- Per-layer mutation rates of the `simsoma layers` template documented as following Goel et al.
+  (2024, Genome Biology 25:194); reference added to `simSOMA_docs/layered_simulation.md` and to
+  the template note.
+
 ## 0.2.2 — 2026-10-09 (documentation; simulation results unchanged)
 
 - `simsoma layers`: documentation `simSOMA_docs/layered_simulation.md` (model, per-organ layer

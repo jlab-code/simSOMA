@@ -154,7 +154,8 @@ def observe_layered(carriers: pd.DataFrame, contributions: Any, observation_conf
 # --------------------------------------------------------------------------- config-driven run
 LAYERED_CONFIG_TEMPLATE = {
     "_about": ("Template for `simsoma layers`. Layer contributions are the mean of published leaf "
-               "compositions; per-layer mutation rates are illustrative relative values. Adapt both to "
+               "compositions; per-layer mutation rates follow Goel et al. 2024 (Genome Biology 25:194). "
+               "Adapt both to "
                "your tissue. "
                "layer_contributions can also be given per organ: {organ: {layer: c}, 'default': {...}}. "
                "Sources and details: simSOMA_docs/layered_simulation.md"),
