@@ -25,7 +25,7 @@ Homepage = "https://github.com/jlab-code/simSOMA"
 packages = ["simsoma", "plantsoma_obs"]
 
 [tool.setuptools.package-data]
-plantsoma_obs = ["CHANGELOG.md"]
+plantsoma_obs = ["CHANGELOG.md", "LICENSE"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
