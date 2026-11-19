@@ -1,5 +1,35 @@
 # Changelog
 
+## 0.3.0 — 2026-11-19 (release cited in the paper)
+
+Simulated values change for a given seed (seed fix, below); the model is unchanged.
+
+- **Seed fix (draws change).** Up to v0.2.3, every pre-branching amplification was re-seeded with a
+  31-bit integer (`random.randrange(2**31)`), so two branch or organ events could receive the same
+  seed and draw identical mutation identifiers in unrelated lineages. The probability is about
+  N²/2³² per genealogy for N events: below 10⁻⁶ for the paper's topologies (≤ 50 events), about 0.2
+  for whole tree crowns (~30,000 events); affected genealogies have a few too few distinct mutations.
+  The amplification now draws from its event's own stream (128-bit derived seed). Regression test
+  `tests/test_seed_streams.py`. Users with large topologies should rerun with this version.
+- **Package layout.** The simulator modules moved from `simSOMA_corefunc/` into the `simsoma`
+  package and use relative imports; `simsoma.use_core()` and `simsoma.core_path()` were removed.
+  Import modules as `from simsoma import pipeline_wrapper` (after `pip install .`), and run module
+  scripts as `python -m simsoma.<module>`. The `simsoma` command, the configurations, the shell
+  wrappers in `simSOMA_scripts/` and the outputs are unchanged (equivalence run against v0.2.3 before
+  the seed fix: identical outputs apart from absolute paths and timestamps).
+- **plantsoma_obs 1.1.1** (was 1.1.0; bundled, code as in the plantsoma_obs 1.1.1 release).
+  Changes data only for background sites in the `lognormal_site_sample` depth mode: the sample
+  (organ) depth factor is now drawn once per sample and shared by somatic and background sites (1.1.0
+  drew it twice). New options are off by default. Outputs record the version and the settings digest.
+- **Notation.** The founder quantity (P_eff − 1)m/C is written χ, as in the paper. Configured truth
+  exports `chi_B` and `chi_O`; `phi_B` and `phi_O` remain as deprecated aliases with identical values.
+  New `simSOMA_docs/notation.md` maps the paper's symbols to configuration keys and output fields.
+- **Paper scripts.** `paper/fig6/plot_fig6_CI_styled.py` (the plotting script of main-text Fig. 6C–I)
+  and its settings record `paper/fig6/fig6_settings.json` added; Supplementary Figs. S1–S4 scripts use
+  the paper's notation. `paper/README.md` lists the scripts.
+- **Metadata.** `CITATION.cff` with the Zenodo DOI and the preprint; DOI badge in the README.
+- 53 tests.
+
 ## 0.2.3 — 2026-10-10 (documentation; simulation results unchanged)
 
 - Per-layer mutation rates of the `simsoma layers` template documented as following Goel et al.
@@ -75,7 +105,7 @@ Fixes agreed 2026-10-07 during the manuscript revision. Paper-relevant notes in 
   [Manuscript figures unaffected: none use founder/lineage statistics.]
 - **Shared observation model `plantsoma_obs` (1.1.0).** Depth / read / error / caller /
   ascertainment steps of the mutation-level transform now call one versioned implementation,
-  merged with the vafSOMA benchmark generator v4 (simSOMA_extensions v4; v3 withdrawn): read depth
+  merged with the depth model of the vafSOMA benchmark generator: read depth
   Poisson(D g_i e_is h_s) with log-normal site / site-by-sample / sample factors (sdlog 0.58 / 0.17 /
   0.27) fitted to apricot fruit pseudobulk input tables (Goel et al. 2024), background artefact
   sites, depth tiers as nested filters of one read set, all-sample site filter. Existing configurations are numerically
@@ -85,7 +115,7 @@ Fixes agreed 2026-10-07 during the manuscript revision. Paper-relevant notes in 
   histories on one topology (own seed and mu_unit per layer; shared developmental parameters and
   phyllotactic event positions), bulk combination with global or per-organ layer contributions,
   read-level observation, vafSOMA-format depth-tier tables. Follows the conventions of the
-  simSOMA_extensions v4 generator (depth draws identical for the same seed; tested).
+  vafSOMA benchmark generator (depth draws identical for the same seed; tested).
 - **Organ mutation-rate multiplier** `organ_mu_multiplier` (optional organ-module parameter,
   default 1): scales the per-division rate during organ amplification only. Historical set
   labels unchanged when 1.

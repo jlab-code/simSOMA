@@ -1,8 +1,8 @@
-"""SI figure: neutral 1/q tail of organ-private variants and the organ mutation-rate multiplier.
+"""SI figure: neutral 1/f tail of organ-private variants and the organ mutation-rate multiplier.
 
 Theory (balanced binary expansion from P_o precursors to O cells, rate mu_div per daughter edge,
-multiplier g for organ divisions): number of organ-private variants with cellular frequency >= q,
-for 1/O <= q <= 1/P_o,  M(>= q) ~= 2 g mu_div (1/q - P_o).
+multiplier g for organ divisions): number of organ-private variants with carrier fraction >= f,
+for 1/O <= f <= 1/(2 P_o),  M(>= f) ~= 2 g mu_div (1/f - P_o).
 Simulated with the full pipeline (SI topology 01). Usage: python3 organ_tail.py OUT.png
 """
 import sys, collections
@@ -35,10 +35,10 @@ for (Po, g), col in COL.items():
     lab = f"P_o={Po}, organ multiplier {g:g}"
     ax[0].plot(1 / qs, M, "o", ms=4, color=col, label=lab); ax[0].plot(1 / qs, th, "-", lw=1, color=col)
     ax[1].plot(qs, M, "o", ms=3, color=col); ax[1].plot(qs, th, "-", lw=1, color=col)
-ax[0].set_xlabel("1 / q"); ax[0].set_ylabel("organ-private variants with frequency >= q")
-ax[0].set_title("A  Points: simulation; lines: 2 g $\\mu_{div}$ (1/q - $P_o$)", loc="left", fontsize=8)
+ax[0].set_xlabel("1 / f"); ax[0].set_ylabel("organ-private variants with carrier fraction >= f")
+ax[0].set_title("A  Points: simulation; lines: 2 g $\\mu_{div}$ (1/f - $P_o$)", loc="left", fontsize=8)
 ax[0].legend(frameon=False, fontsize=7)
-ax[1].set_xscale("log"); ax[1].set_yscale("log"); ax[1].set_xlabel("cellular frequency q")
+ax[1].set_xscale("log"); ax[1].set_yscale("log"); ax[1].set_xlabel("carrier fraction f")
 ax[1].set_title("B  Same data, log-log", loc="left", fontsize=8)
 for a in ax:
     a.spines[["top", "right"]].set_visible(False); a.grid(color="#e4e3df", lw=0.5)

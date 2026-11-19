@@ -1,0 +1,63 @@
+{
+  "mapping": {
+    "unit": "years",
+    "rate": 5.0,
+    "mode": "deterministic"
+  },
+  "params": {
+    "m": 4,
+    "rho": 0.0,
+    "kappa_sr": 5.0,
+    "sam_boundary_cells": 64,
+    "branch_precursor_number": 4,
+    "organ_precursor_number": 8,
+    "organ_total_cells": 10000,
+    "sequenced_cells": 1000
+  },
+  "layers": {
+    "L1": {
+      "mu_unit": 1.0
+    },
+    "L2": {
+      "mu_unit": 1.0
+    },
+    "L3": {
+      "mu_unit": 1.0
+    }
+  },
+  "contributions": {
+    "L1": 0.1,
+    "L2": 0.7,
+    "L3": 0.2
+  },
+  "reads": {
+    "depth": {
+      "mode": "lognormal_site_sample",
+      "mean": 60
+    },
+    "reads": {
+      "type": "binomial",
+      "sequencing_error": 0.0
+    },
+    "caller": {
+      "min_depth": 0,
+      "min_alt_reads": 2,
+      "retain_called_any": true
+    }
+  },
+  "background": {
+    "n_sites": 2000,
+    "distribution": "gamma:2",
+    "mean": 0.023
+  },
+  "depth_series": [
+    20,
+    60,
+    150
+  ],
+  "seed": 20261008,
+  "reps": 10,
+  "topology": "/tmp/claude-0/-home-claude/9cba027f-674e-5043-ba2f-9c10944e0c7c/scratchpad/src/simSOMA-observation-model/simSOMA_inputs/topologies/topology_01_multibranch_20organs_order1to5.json",
+  "plantsoma_obs_version": "1.1.0",
+  "reads_config_sha256": "e5b2402a4974269c01cfee2a07cfbce79397fd69a7c8e4219d1428cfaeebd22c"
+}

@@ -76,7 +76,7 @@ class SelfRenewalParams:
 
     # Deprecated alias of mu_unit (historical name; the rate is per topology unit,
     # not necessarily per year). Accepted as keyword for backward compatibility
-    # (e.g. fitSOMA, simSOMA_extensions); always equal to mu_unit after construction.
+    # (e.g. fitSOMA); always equal to mu_unit after construction.
     mu_year: Optional[float] = None
 
     def __post_init__(self) -> None:

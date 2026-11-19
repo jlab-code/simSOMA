@@ -1,15 +1,21 @@
 # simSOMA
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23274014.svg)](https://doi.org/10.5281/zenodo.23274014)
+
 **simSOMA** is a cell-lineage based simulator of somatic variant allele-frequency (VAF) spectra in plants. It models how shoot apical meristem dynamics, cell-lineage turnover, branch founding, organ formation and plant topology jointly shape observed VAF spectra and variant sharing across sampled organs.
 
 This repository accompanies the paper:
 
 > **simSOMA: a cell-lineage based simulator of the somatic VAF spectrum in plants**
+> (Johannes F, bioRxiv doi:[10.64898/2026.06.28.735079](https://doi.org/10.64898/2026.06.28.735079))
 
 ## Status
 
-Version 0.2.3 (release accompanying the revised paper). Changes since 0.1.0-beta are listed in
-`CHANGELOG.md`.
+Version 0.3.0 (release cited in the paper). Changes are listed in `CHANGELOG.md`.
+Version 0.3.0 fixes a seed collision of earlier versions that affects large topologies and therefore
+draws different random numbers for a given seed than v0.2.3; it also moves the simulator modules into
+the `simsoma` package (`from simsoma import pipeline_wrapper`). The notation of the documentation
+follows the paper (`simSOMA_docs/notation.md`).
 
 ## Install and command line
 
@@ -24,6 +30,10 @@ simsoma template layered > layered.json                    # template for `simso
 simsoma topology-from-csv branches.csv organs.csv topology.json --unit meters
 simsoma topology-from-tls segments.txt topology.json --organs all    # TLS / TreeQSM segment table
 ```
+
+The simulator modules are part of the `simsoma` package, for example
+`from simsoma import pipeline_wrapper, self_renewal, topology_io`; modules with a command-line
+interface also run as `python -m simsoma.<module>` from the repository root.
 
 ## Topology input modes
 
@@ -190,7 +200,9 @@ https://github.com/jlab-code/simSOMA-tutorial
 
 ## Citation
 
-If you use simSOMA, please cite the accompanying paper and the software repository. Repository citation metadata are provided in `CITATION.cff`.
+If you use simSOMA, please cite the accompanying paper and the software archive on Zenodo
+(doi:[10.5281/zenodo.23274014](https://doi.org/10.5281/zenodo.23274014); the record lists all versions).
+Citation metadata are provided in `CITATION.cff`.
 
 ## License
 

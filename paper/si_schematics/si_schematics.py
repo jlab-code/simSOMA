@@ -3,7 +3,7 @@
 FigureS1_selfrenewal.pdf   : one self-renewal round (division, displacement with independent
                             daughter, victim locality lambda_vic, favored clone w_B)
 FigureS2_founding.pdf      : pre-branching amplification into sectors, index notation
-                            (x_k, alpha_i, beta_i), branch founding and organ founding blocks,
+                            (x_k, sector bounds b_i), branch founding and organ founding blocks,
                             monoclonal vs polyclonal founding
 FigureS4_observation.pdf   : levels of the observation model
 Usage: python3 si_schematics.py OUTDIR
@@ -56,7 +56,7 @@ def fig_selfrenewal():
     ax.set_title("A  Niche state X(t-1)", loc="left", fontsize=9, weight="bold")
     ring(ax, 0, 0, base, labels=[str(i + 1) for i in range(m)], hl=[0])
     ax.text(0, 0, "m = 6", ha="center", va="center", fontsize=8)
-    ax.text(0, -1.3, "ordered ring of m ASC positions;\nposition 1 = favored seed (q = 1, weight 1);\n"
+    ax.text(0, -1.3, "ordered ring of m ASC positions;\nposition 1 = favored seed (fav = 1, weight 1);\n"
             "others weight 1 - w_B", ha="center", va="top", fontsize=6.5)
 
     ax = axes[1]
@@ -66,8 +66,8 @@ def fig_selfrenewal():
         am = np.deg2rad(90 - (i + 0.5) * 360 / m)
         ax.plot(0.62 * np.cos(am), 0.62 * np.sin(am), "*", color="gold", ms=7, mec="k", mew=0.4)
     ax.text(0, 0, "+Pois(μ_div)\nper edge", ha="center", va="center", fontsize=6.5)
-    ax.text(0, -1.3, "each cell divides once; the daughter\nkeeping the position receives\n"
-            "K ~ Poisson(μ_div) new mutations", ha="center", va="top", fontsize=6.5)
+    ax.text(0, -1.3, "each cell divides once; the daughter\nkeeping the position receives a\n"
+            "Poisson(μ_div) number of new mutations", ha="center", va="top", fontsize=6.5)
 
     ax = axes[2]
     ax.set_title("C  Displacement (prob. ρ)", loc="left", fontsize=9, weight="bold")
@@ -122,12 +122,12 @@ def fig_founding():
     for i in range(m):
         a = i * sec[0]
         ax.plot([a * w, a * w], [6.05, 6.75], color="k", lw=0.6)
-        ax.text(a * w, 5.85, f"α{i + 1}={a}", fontsize=6, ha="center", va="top")
+        ax.text(a * w, 5.85, f"b{i + 1}={a}", fontsize=6, ha="center", va="top")
         ax.text((a + sec[0] / 2) * w, 6.42, f"S{i + 1}", ha="center", va="center", fontsize=7, color="white", weight="bold")
     ax.plot([C * w, C * w], [6.05, 6.75], color="k", lw=0.6)
-    ax.text(C * w, 5.85, f"β{m}={C}", fontsize=6, ha="center", va="top")
-    ax.text(0.0, 5.35, "cells x0, x1, ..., x(C-1); sector S_i occupies indices [α_i, β_i), "
-            "σ_i = β_i - α_i ≈ C/m (ring: x(C-1) is adjacent to x0)", fontsize=6.5, va="top")
+    ax.text(C * w, 5.85, f"b{m + 1}={C}", fontsize=6, ha="center", va="top")
+    ax.text(0.0, 5.35, "cells x0, x1, ..., x(C-1); sector S_i occupies indices [b_i, b_(i+1)), "
+            "σ_i = b_(i+1) - b_i ≈ C/m (ring: x(C-1) is adjacent to x0)", fontsize=6.5, va="top")
 
     # B: branch founding
     ax.text(-2.5, 4.75, "B  Branch founding (P_b,eff = min(P_b, m, C))", fontsize=9, weight="bold", va="top")
@@ -146,7 +146,7 @@ def fig_founding():
     ax.text(10.3, 1.33, "organ:\nO cells,\nn_seq sampled", fontsize=6.5, va="center")
     ax.text(0.0, 0.75,
             "A block of P contiguous cells is polyclonal if it spans a sector boundary. For uniformly placed blocks,\n"
-            "Pr(polyclonal) = min{1, φ} with φ = (P - 1) m / C (exact if C is divisible by m and P ≤ C/m + 1);\n"
+            "Pr(polyclonal) = min{1, χ} with χ = (P - 1) m / C (exact if C is divisible by m); for P ≤ C/m + 1,\n"
             "the expected number of sectors in the block is 1 + Pr(polyclonal).",
             fontsize=6.5, va="top")
     fig.savefig(f"{OUT}/FigureS2_founding.pdf"); fig.savefig(f"{OUT}/FigureS2_founding.png", dpi=150)
@@ -159,8 +159,8 @@ def fig_observation():
     boxes = [
         ("Developmental VAF\n$v^{(k)}_{io}$", "per layer k\n(independent lineage\nhistories, one topology)"),
         ("Assay VAF\n$\\tilde v_{io}=\\eta\\sum_k a_{ko} v^{(k)}_{io}$", "layer contributions $a_{ko}$\nphasing $\\eta\\in\\{1,1/2\\}$"),
-        ("Read depth\n$D_{io}$", "fixed | normal | Poisson |\nlog-normal site, site-by-organ\nand organ factors (apricot)"),
-        ("Variant reads\n$A_{io}\\sim\\mathrm{Bin}(D_{io},p_{io})$", "$p=\\tilde v(1-e)+(1-\\tilde v)e$\n(or beta-binomial)\n+ background sites"),
+        ("Read depth\n$d_{io}$", "fixed | normal | Poisson |\nlog-normal site, site-by-organ\nand organ factors (apricot)"),
+        ("Variant reads\n$y_{io}\\sim\\mathrm{Bin}(d_{io},p_e(\\tilde v_{io}))$", "$p_e(v)=e+(1-2e)v$\n(or beta-binomial)\n+ background sites"),
         ("Calls / ascertainment", "min depth, min alt reads,\nmin VAF; keep sites called\nin >= 1 sample"),
     ]
     xs = np.linspace(1.5, 13.5, len(boxes))
