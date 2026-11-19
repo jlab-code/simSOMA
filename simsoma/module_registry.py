@@ -56,7 +56,7 @@ class DefaultPreBranchingAdapter:
         event_age: int,
         boundary_cells_target: int,
         start_dev: int,
-        seed: int,
+        seed: Optional[int] = None,
         rng: np.random.Generator,
     ) -> Tuple[List[_sr.CellState], int]:
         pre_in = _pre.PreBranchingInputs(
@@ -64,7 +64,7 @@ class DefaultPreBranchingAdapter:
             event_age=int(event_age),
             boundary_cells_target=int(boundary_cells_target),
             start_dev=int(start_dev),
-            seed=int(seed),
+            seed=None if seed is None else int(seed),
         )
         out = _pre.pre_branching_amplify(sr_params, list(niche_state), pre_in, rng=rng)
         return list(out.ring_state), int(out.end_time[1])

@@ -120,7 +120,7 @@ def run_organ_event(
         organ_params,
         precursors,
         quotas,
-        rng=(np_rng if np_rng is not None else np.random.default_rng(rng.randrange(2**31))),
+        rng=(np_rng if np_rng is not None else np.random.default_rng(rng.getrandbits(128))),
     )
 
     if inputs.sequenced_cells is None:

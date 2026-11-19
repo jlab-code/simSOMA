@@ -342,7 +342,8 @@ def run_pipeline(
             phyllo_site_id = e.get("phyllo_site_id")
             phyllo_site_rank = e.get("phyllo_site_rank")
 
-            pre_py = _py_rng("pre", branch_id, event_age, e_idx)
+            # The amplification draws from the event's own stream (128-bit derived seed). Up to v0.2.3 it was
+            # re-seeded with a 31-bit integer, so that two events could draw identical mutation identifiers.
             pre_np = _np_rng("pre", branch_id, event_age, e_idx)
             ring, end_dev = reg.pre_branching.amplify(
                 sr_params,
@@ -351,7 +352,7 @@ def run_pipeline(
                 event_age=int(event_age),
                 boundary_cells_target=int(sam_boundary_cells),
                 start_dev=0,
-                seed=int(pre_py.randrange(2**31)),
+                seed=None,
                 rng=pre_np,
             )
 
