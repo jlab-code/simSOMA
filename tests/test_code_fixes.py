@@ -9,11 +9,10 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "simSOMA_corefunc"))
 
-import topology_io  # noqa: E402
-import self_renewal  # noqa: E402
-import run_from_config  # noqa: E402
+from simsoma import topology_io  # noqa: E402
+from simsoma import self_renewal  # noqa: E402
+from simsoma import run_from_config  # noqa: E402
 
 
 def _topo(T_obs):

@@ -7,9 +7,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "simSOMA_corefunc"))
-sys.path.insert(0, str(ROOT))
-import plot_topology_json  # noqa: E402
+from simsoma import plot_topology_json  # noqa: E402
 
 TOPO = {"unit": "years",
         "branches": [{"id": "trunk", "parent": None, "length": 30},
@@ -59,7 +57,7 @@ class UsabilityTests(unittest.TestCase):
                    "pre_branching": {"sam_boundary_cells": 8}, "branching": {"branch_precursor_number": 2},
                    "organ": {"organ_precursor_number": 2, "organ_total_cells": 16, "seq_fraction": 1}}}}
         p = d / "c.json"; p.write_text(json.dumps(cfg))
-        import run_from_config
+        from simsoma import run_from_config
         with self.assertRaisesRegex(FileNotFoundError, "relative to the folder of the config file"):
             run_from_config.main(["--config", str(p), "--step", "check"])
 

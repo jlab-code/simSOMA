@@ -17,7 +17,7 @@ fi
 
 echo
 echo "Tracked source checksums:"
-for f in   simSOMA_corefunc/run_from_config.py   simSOMA_corefunc/pipeline_wrapper.py   simSOMA_corefunc/self_renewal.py   simSOMA_corefunc/pre_branching.py   simSOMA_corefunc/branching.py   simSOMA_corefunc/organ.py   simSOMA_corefunc/summaries.py   simSOMA_corefunc/branch_bias.py   simSOMA_corefunc/topology_io.py   simSOMA_corefunc/inspect_topology.py   simSOMA_corefunc/launch_grid_splits.py   simSOMA_corefunc/plot_topology_json.py
+for f in   simsoma/run_from_config.py   simsoma/pipeline_wrapper.py   simsoma/self_renewal.py   simsoma/pre_branching.py   simsoma/branching.py   simsoma/organ.py   simsoma/summaries.py   simsoma/branch_bias.py   simsoma/topology_io.py   simsoma/inspect_topology.py   simsoma/launch_grid_splits.py   simsoma/plot_topology_json.py
   do
     if [[ -f "${PROJECT_ROOT}/${f}" ]]; then
       sha256_rel "${f}"

@@ -15,7 +15,7 @@ import random
 
 import numpy as np
 
-from self_renewal import CellState, SelfRenewalParams, SelfRenewalSimulator
+from .self_renewal import CellState, SelfRenewalParams, SelfRenewalSimulator
 
 
 @dataclass(frozen=True)

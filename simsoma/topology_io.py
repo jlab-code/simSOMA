@@ -53,7 +53,7 @@ from typing import Any, Dict, List, Optional, Tuple
 import math
 import random
 
-import phyllotaxy
+from . import phyllotaxy
 
 
 Topology = Dict[str, Any]

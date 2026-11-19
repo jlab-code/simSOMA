@@ -3,7 +3,7 @@
 `simsoma topology-from-tls` converts a TreeQSM-style segment table (tab-separated, one row per
 segment) into a simSOMA topology in meters. Required columns: `segment`, `parent_segment`
 (0 = root), `branch_order`, `length_m`, `base_distance_m`. Implementation:
-`simSOMA_corefunc/topology_tls.py` (converter version in the output, `conversion.converter_version`).
+`simsoma/topology_tls.py` (converter version in the output, `conversion.converter_version`).
 
 ```bash
 simsoma topology-from-tls simSOMA_inputs/examples/tls_synthetic_segments.txt tls_r10.json \

@@ -10,8 +10,7 @@ from pathlib import Path
 import numpy as np, matplotlib
 matplotlib.use("Agg"); import matplotlib.pyplot as plt
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / "simSOMA_corefunc"))
-import topology_io, pipeline_wrapper, self_renewal  # noqa: E402
+from simsoma import topology_io, pipeline_wrapper, self_renewal  # noqa: E402  (pip install . first)
 out = Path(sys.argv[1]) if len(sys.argv) > 1 else Path("organ_tail.png")
 topo = topology_io.load_topology_auto(ROOT / "simSOMA_inputs/topologies/topology_01_multibranch_20organs_order1to5.json",
                                       mapping={"unit": "years", "rate": 5.0, "mode": "deterministic"})

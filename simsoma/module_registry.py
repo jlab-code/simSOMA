@@ -9,11 +9,11 @@ from typing import Any, Dict, List, Optional, Sequence, Tuple
 import random
 import numpy as np
 
-import self_renewal as _sr
-import pre_branching as _pre
-import branching as _br
-import organ as _org
-from founder_diversity import FOUNDER_EVENT_FIELDS, summarize_founder_lineages, summarize_founder_sectors
+from . import self_renewal as _sr
+from . import pre_branching as _pre
+from . import branching as _br
+from . import organ as _org
+from .founder_diversity import FOUNDER_EVENT_FIELDS, summarize_founder_lineages, summarize_founder_sectors
 
 
 class DefaultSelfRenewalAdapter:
@@ -170,7 +170,7 @@ class DefaultOrganAdapter:
 
 
 def default_registry() -> "plugin_api.ModuleRegistry":
-    from plugin_api import ModuleRegistry
+    from .plugin_api import ModuleRegistry
     return ModuleRegistry(
         self_renewal=DefaultSelfRenewalAdapter(),
         pre_branching=DefaultPreBranchingAdapter(),

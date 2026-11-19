@@ -6,8 +6,7 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "simSOMA_corefunc"))
-import topology_io, topology_tls  # noqa: E402
+from simsoma import topology_io, topology_tls  # noqa: E402
 
 # trunk: 1 -> 2 -> 3 (order 0, 2 m each, base 0/2/4); branch 4 (order 1) on segment 2 at base 3.0,
 # continued by 5; branch 6 (order 1) on segment 3 at base 5.0; 7 (order 2) on 5.
@@ -83,7 +82,7 @@ class TLSConfigInputTests(unittest.TestCase):
     """topology.topology_tls: TLS segment table as a config input mode."""
 
     def _cfg(self, topology, d):
-        import run_from_config as rfc
+        from simsoma import run_from_config as rfc
         raw = {"run": {"experiment_name": "e", "outdir_root": str(d / "out"), "seed": 1},
                "topology": topology, "simulation": {"n_sim": 1}}
         cfgp = d / "c.json"; cfgp.write_text(json.dumps(raw))

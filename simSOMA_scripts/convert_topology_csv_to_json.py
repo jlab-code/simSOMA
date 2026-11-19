@@ -1,11 +1,10 @@
 #!/usr/bin/env python3
-"""Backward-compatible wrapper; the converter lives in simSOMA_corefunc/topology_csv.py
-(also available as `simsoma topology-from-csv`)."""
+"""Backward-compatible wrapper; the converter is ``simsoma.topology_csv``
+(also available as `simsoma topology-from-csv` or `python -m simsoma.topology_csv`)."""
 import sys
 from pathlib import Path
 
-sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "simSOMA_corefunc"))
-from topology_csv import main  # noqa: E402
-
 if __name__ == "__main__":
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))   # repository checkout without installation
+    from simsoma.topology_csv import main
     raise SystemExit(main())

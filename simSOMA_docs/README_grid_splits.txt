@@ -1,13 +1,13 @@
 # simSOMA split-grid launcher
 
-`launch_grid_splits.py` takes one grouped `grid_parameter` master config, splits the full Cartesian parameter grid into contiguous subsets, writes child configs, launches them, and merges the outputs back into the master run directory.
+`simsoma.launch_grid_splits` (also `simsoma run CONFIG --splits N`) takes one grouped `grid_parameter` master config, splits the full Cartesian parameter grid into contiguous subsets, writes child configs, launches them, and merges the outputs back into the master run directory.
 
 ## Usage
 
 ```bash
-cd simSOMA_corefunc
-python launch_grid_splits.py \
-  --master-config ../../simSOMA_configs/master_config_template.json \
+cd <repository root>
+python -m simsoma.launch_grid_splits \
+  --master-config simSOMA_configs/master_config_template.json \
   --n-splits 8 \
   --jobs 8
 ```

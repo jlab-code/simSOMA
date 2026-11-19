@@ -8,8 +8,8 @@ from dataclasses import dataclass
 from typing import List, Optional, Sequence, Tuple
 import random
 
-from self_renewal import CellState, Time2D
-from recruitment_utils import allocate_equalized_quotas, select_contiguous_precursors
+from .self_renewal import CellState, Time2D
+from .recruitment_utils import allocate_equalized_quotas, select_contiguous_precursors
 
 
 @dataclass(frozen=True)

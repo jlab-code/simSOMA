@@ -68,9 +68,8 @@ The shell wrappers in `simSOMA_scripts/` keep working unchanged.
 
 ```text
 simSOMA/
-├── simsoma/               # package entry point and command-line interface
+├── simsoma/               # simulator package: modules, command-line interface, topology plotting/checking
 ├── plantsoma_obs/         # shared, versioned sequencing observation model
-├── simSOMA_corefunc/      # simulator source code and topology plotting/checking code
 ├── simSOMA_scripts/       # setup, quick-test, local-run, cluster-run, and utility wrappers
 ├── simSOMA_configs/       # example simulation configuration files
 ├── simSOMA_inputs/        # example topologies, templates, and CSV-topology examples

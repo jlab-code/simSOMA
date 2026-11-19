@@ -1,27 +1,8 @@
 """simSOMA: cell-lineage simulator of somatic VAF spectra in plants.
 
-The simulator modules live in the ``simsoma_corefunc`` package (repository folder
-``simSOMA_corefunc/``); they use flat imports, so ``simsoma.core_path()`` is put on sys.path
-by the CLI. The shared sequencing observation model is the separate ``plantsoma_obs`` package.
+The simulator modules are submodules of this package (``from simsoma import pipeline_wrapper``).
+Modules with a command-line interface run as ``python -m simsoma.<module>``; the main entry point is
+the ``simsoma`` command (``simsoma.cli``). The shared sequencing observation model is the separate
+``plantsoma_obs`` package, which is installed together with simSOMA.
 """
-from pathlib import Path
-
-__version__ = "0.2.3"
-
-
-def core_path() -> Path:
-    """Directory containing the simulator modules (installed or repository checkout)."""
-    try:
-        import simsoma_corefunc
-        return Path(simsoma_corefunc.__file__).resolve().parent
-    except ImportError:
-        return Path(__file__).resolve().parents[1] / "simSOMA_corefunc"
-
-
-def use_core() -> Path:
-    """Make the flat simulator modules importable (``import pipeline_wrapper`` etc.)."""
-    import sys
-    p = str(core_path())
-    if p not in sys.path:
-        sys.path.insert(0, p)
-    return Path(p)
+__version__ = "0.3.0"

@@ -9,11 +9,10 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT)); sys.path.insert(0, str(ROOT / "simSOMA_corefunc"))
 
 import plantsoma_obs  # noqa: E402
-import layered  # noqa: E402
-import pipeline_wrapper, self_renewal, topology_io  # noqa: E402,E401
+from simsoma import layered  # noqa: E402
+from simsoma import pipeline_wrapper, self_renewal, topology_io  # noqa: E402,E401
 
 TOPO = ROOT / "simSOMA_inputs" / "examples" / "example_03_nested_branches.json"
 MAP = {"unit": "years", "rate": 5.0, "mode": "deterministic"}
@@ -159,7 +158,7 @@ class CliTests(unittest.TestCase):
 
 class LayeredTemplateTests(unittest.TestCase):
     def test_template_valid_and_per_organ_contributions(self):
-        import layered
+        from simsoma import layered
         layered.validate_layered_config(layered.LAYERED_CONFIG_TEMPLATE)
         m = layered.resolve_contributions(
             {"leaf_A": {"L1": 0.2, "L2": 0.7, "L3": 0.1}, "default": {"L1": 0.3, "L2": 0.6, "L3": 0.1}},

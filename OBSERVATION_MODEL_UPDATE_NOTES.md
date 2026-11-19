@@ -12,7 +12,7 @@ examples, documentation, tests, and validation reports.
 
 ```bash
 python -m unittest -v tests/test_observation_model.py
-python -m compileall -q simSOMA_corefunc
+python -m compileall -q simsoma
 ```
 
 ## Run the deterministic identity example

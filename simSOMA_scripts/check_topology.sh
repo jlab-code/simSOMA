@@ -94,7 +94,7 @@ TOPOLOGY_JSON="$(printf '%s' "$RESOLVED" | cut -f1)"
 DEFAULT_OUTDIR="$(printf '%s' "$RESOLVED" | cut -f2)"
 OUTDIR="${OUTDIR:-$DEFAULT_OUTDIR}"
 
-"$PY" simSOMA_corefunc/plot_topology_json.py \
+"$PY" -m simsoma.plot_topology_json \
   --topology_json "$TOPOLOGY_JSON" \
   --outdir "$OUTDIR" \
   --out_name "$OUT_NAME"

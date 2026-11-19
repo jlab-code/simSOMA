@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "simsoma"
-version = "0.2.3"
+version = "0.3.0"
 description = "Cell-lineage simulator of somatic variant allele-frequency spectra in plants"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -22,12 +22,11 @@ simsoma = "simsoma.cli:main"
 Homepage = "https://github.com/jlab-code/simSOMA"
 
 [tool.setuptools]
-packages = ["simsoma", "simsoma_corefunc", "plantsoma_obs"]
-
-[tool.setuptools.package-dir]
-simsoma = "simsoma"
-simsoma_corefunc = "simSOMA_corefunc"
-plantsoma_obs = "plantsoma_obs"
+packages = ["simsoma", "plantsoma_obs"]
 
 [tool.setuptools.package-data]
 plantsoma_obs = ["CHANGELOG.md"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

@@ -10,8 +10,8 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Optional
 
-import topology_io
-from pipeline_wrapper import validate_topology_contract, summarize_topology
+from . import topology_io
+from .pipeline_wrapper import validate_topology_contract, summarize_topology
 
 
 def _mapping_from_args(args: argparse.Namespace) -> Optional[Dict[str, Any]]:

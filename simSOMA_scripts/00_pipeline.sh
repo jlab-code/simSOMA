@@ -37,7 +37,7 @@ export NUMEXPR_NUM_THREADS=1
 hash -r
 
 export SIMSOMA_HOME="${PROJECT_ROOT}"
-export SIMSOMA_CODE_DIR="${SIMSOMA_HOME}/simSOMA_corefunc"
+export SIMSOMA_CODE_DIR="${SIMSOMA_HOME}/simsoma"
 export SIMSOMA_INPUT_DIR="${SIMSOMA_HOME}/simSOMA_inputs"
 export SIMSOMA_CONFIG_DIR="${SIMSOMA_HOME}/simSOMA_configs"
 export SIMSOMA_OUTPUT_DIR="${SIMSOMA_HOME}/simSOMA_output"
@@ -201,7 +201,8 @@ echo "SIMSOMA_OUTPUT_DIR=${SIMSOMA_OUTPUT_DIR}"
 echo
 check_environment
 
-cd "${SIMSOMA_CODE_DIR}"
+# Modules run as `python -m simsoma.<module>` from the project root (no installation needed).
+cd "${SIMSOMA_HOME}"
 
 run_check() {
   echo
@@ -215,7 +216,7 @@ run_grid() {
   echo
   echo "[2/2] Launching split jobs"
   cmd=(
-    "${PYTHON_CMD}" launch_grid_splits.py
+    "${PYTHON_CMD}" -m simsoma.launch_grid_splits
     --master-config "${MASTER_CONFIG}"
     --n-splits "${N_SPLITS}"
     --jobs "${N_PARALLEL_JOBS}"

@@ -12,11 +12,8 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[1]
-CORE = ROOT / "simSOMA_corefunc"
-if str(CORE) not in sys.path:
-    sys.path.insert(0, str(CORE))
 
-from configured_observation_model import (  # noqa: E402
+from simsoma.configured_observation_model import (  # noqa: E402
     _canonical_truth_aliases,
     _contract_sha256,
     _deterministic_evidence,

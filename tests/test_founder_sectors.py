@@ -8,12 +8,11 @@ import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT / "simSOMA_corefunc"))
 
-import founder_diversity as fd  # noqa: E402
-import pipeline_wrapper  # noqa: E402
-import self_renewal  # noqa: E402
-import topology_io  # noqa: E402
+from simsoma import founder_diversity as fd  # noqa: E402
+from simsoma import pipeline_wrapper  # noqa: E402
+from simsoma import self_renewal  # noqa: E402
+from simsoma import topology_io  # noqa: E402
 
 TOPO = ROOT / "simSOMA_inputs" / "examples" / "example_03_nested_branches.json"
 

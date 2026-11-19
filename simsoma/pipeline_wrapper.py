@@ -42,15 +42,15 @@ import copy
 
 import numpy as np
 
-import self_renewal
-import pre_branching
-import branching
-import organ
-import topology_io
-import summaries
-from founder_diversity import FOUNDER_EVENT_FIELDS
-import branch_bias
-import phyllotaxy
+from . import self_renewal
+from . import pre_branching
+from . import branching
+from . import organ
+from . import topology_io
+from . import summaries
+from .founder_diversity import FOUNDER_EVENT_FIELDS
+from . import branch_bias
+from . import phyllotaxy
 
 
 def _build_children_map(topo: Dict[str, Any]) -> Dict[str, List[str]]:
@@ -208,8 +208,8 @@ def run_pipeline(
             seed=_stable_seed_int(base_seed, "phyllotaxy"),
         )
 
-    import module_registry
-    from plugin_api import ModuleRegistry as _MR
+    from . import module_registry
+    from .plugin_api import ModuleRegistry as _MR
     defaults = module_registry.default_registry()
     reg = _MR.from_paths(defaults, module_paths=module_paths)
 

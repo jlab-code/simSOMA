@@ -48,12 +48,7 @@ from typing import Iterable, Any, Mapping
 
 import numpy as np
 
-try:  # shared plantSOMA observation model (installed package or repository checkout)
-    import plantsoma_obs
-except ImportError:  # running from simSOMA_corefunc/ inside the repository
-    import sys as _sys
-    _sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    import plantsoma_obs
+import plantsoma_obs  # shared plantSOMA observation model (bundled package)
 import pandas as pd
 
 STD_AGG_FILE = "vaf_count_spectrum_aggregated_summaries.csv"

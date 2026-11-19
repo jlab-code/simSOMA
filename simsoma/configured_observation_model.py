@@ -27,7 +27,7 @@ from typing import Any, Mapping
 import numpy as np
 import pandas as pd
 
-from transform_observation_model import (
+from .transform_observation_model import (
     run_observation_model_transform,
     transform_vaf_observations,
 )
@@ -324,7 +324,7 @@ def _canonical_truth_aliases(configured: Mapping[str, Any], run_config: Mapping[
     # Expected clonal composition of founders (local_sector_v1; exact for uniform focal
     # placement, i.e. no phyllotaxy): phi = (P_eff - 1) m / C, pi = Pr(polyclonal founding).
     try:
-        from founder_diversity import FOUNDER_DEFINITION_VERSION, polyclonal_founding_expectation
+        from .founder_diversity import FOUNDER_DEFINITION_VERSION, polyclonal_founding_expectation
         out["founder_definition"] = FOUNDER_DEFINITION_VERSION
         m_i = int(float(configured.get("m", 0)))
         C_i = out.get("C")

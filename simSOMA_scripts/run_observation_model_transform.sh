@@ -76,8 +76,8 @@ if [[ ! -x "$PYTHON_BIN" ]]; then
 fi
 
 CMD=(
-  "$PYTHON_BIN"
-  "$PROJECT_ROOT/simSOMA_corefunc/transform_observation_model.py"
+  env "PYTHONPATH=$PROJECT_ROOT${PYTHONPATH:+:$PYTHONPATH}"
+  "$PYTHON_BIN" -m simsoma.transform_observation_model
   --run-dir "$RUN_DIR"
   --scenario-name "$SCENARIO_NAME"
   --layer-names "$LAYER_NAMES"

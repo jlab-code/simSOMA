@@ -75,7 +75,7 @@ if [[ -f simSOMA_scripts/02_version_report.sh ]]; then
 fi
 [[ -f VERSION ]] && cat VERSION || true
 
-ACTUAL_CHECKSUM="$(sha256sum simSOMA_corefunc/run_from_config.py | awk '{print $1}')"
+ACTUAL_CHECKSUM="$(sha256sum simsoma/run_from_config.py | awk '{print $1}')"
 echo "run_from_config.py checksum: $ACTUAL_CHECKSUM"
 
 if [[ ! -f "$MASTER_CONFIG" ]]; then

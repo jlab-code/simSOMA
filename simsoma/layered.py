@@ -31,16 +31,11 @@ from typing import Any, Dict, Mapping, Optional, Sequence
 import numpy as np
 import pandas as pd
 
-import pipeline_wrapper
-import self_renewal
-import topology_io
+from . import pipeline_wrapper
+from . import self_renewal
+from . import topology_io
 
-try:
-    import plantsoma_obs
-except ImportError:  # repository checkout without installation
-    import sys as _sys
-    _sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-    import plantsoma_obs
+import plantsoma_obs
 
 LAYERED_API_VERSION = "1.0.0"
 PHASE_FACTORS = {"phased": 1.0, "unphased": 0.5}
@@ -204,7 +199,7 @@ def run_layered_config(config_path: str | Path) -> Dict[str, Any]:
     validate_layered_config(cfg)
     base = config_path.parent
     tcfg = cfg["topology"]
-    import run_from_config as _rfc          # same path rules as `simsoma run`
+    from . import run_from_config as _rfc  # same path rules as `simsoma run`
     tpath = _rfc._resolve_topology_json_path(str(tcfg["topology_json"]), base_dir=base)
     if not tpath.is_file():
         raise FileNotFoundError(f"topology.topology_json not found: {tpath}\n"
@@ -251,10 +246,7 @@ def run_layered_config(config_path: str | Path) -> Dict[str, Any]:
                 "plantsoma_obs_version": plantsoma_obs.OBSERVATION_MODEL_VERSION,
                 "observation_config_sha256": (plantsoma_obs.config_sha256(cfg["observation"].get("model", {}))
                                               if "observation" in cfg else None)}
-    try:
-        import simsoma
-        settings["simsoma_version"] = simsoma.__version__
-    except Exception:
-        pass
+    from . import __version__ as _simsoma_version
+    settings["simsoma_version"] = _simsoma_version
     (out / "layered_settings.json").write_text(json.dumps(settings, indent=2))
     return {"output_dir": str(out), "files": written}

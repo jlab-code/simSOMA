@@ -19,8 +19,8 @@ import numpy as np
 import pandas as pd
 
 ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT)); sys.path.insert(0, str(ROOT / "simSOMA_corefunc"))
-import layered, topology_io, plantsoma_obs  # noqa: E402,E401
+from simsoma import layered, topology_io  # noqa: E402,E401  (pip install . or run from the repository root)
+import plantsoma_obs  # noqa: E402
 
 ap = argparse.ArgumentParser()
 ap.add_argument("--reps", type=int, default=10)

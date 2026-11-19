@@ -12,9 +12,9 @@ import numpy as np
 
 from dataclasses import replace
 
-from self_renewal import CellState, SelfRenewalParams, SelfRenewalSimulator, Time2D
-from recruitment_utils import allocate_equalized_quotas, expand_founders_to_exact_leaves, select_contiguous_precursors
-from founder_diversity import summarize_founder_lineages, summarize_founder_sectors
+from .self_renewal import CellState, SelfRenewalParams, SelfRenewalSimulator, Time2D
+from .recruitment_utils import allocate_equalized_quotas, expand_founders_to_exact_leaves, select_contiguous_precursors
+from .founder_diversity import summarize_founder_lineages, summarize_founder_sectors
 
 
 @dataclass(frozen=True)

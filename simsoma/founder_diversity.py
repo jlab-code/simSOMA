@@ -40,7 +40,7 @@ import bisect
 from collections import Counter
 from typing import Any, Iterable, Sequence
 
-from recruitment_utils import allocate_equalized_quotas, contiguous_block_indices
+from .recruitment_utils import allocate_equalized_quotas, contiguous_block_indices
 
 FOUNDER_DEFINITION_VERSION = "local_sector_v1"
 

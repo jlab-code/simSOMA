@@ -12,8 +12,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Sequence, Tuple
 
-import run_from_config as rfc
-import summaries
+from . import run_from_config as rfc
+from . import summaries
 
 CSV_FILES = [
     "parameter_sets.csv",
@@ -728,9 +728,9 @@ def main(argv=None) -> None:
             print(f"Reusing existing master topology check: {master_check_dir}")
         else:
             subprocess.run(
-                [sys.executable, str(pipeline_dir / "run_from_config.py"), "--config", str(master_config_path), "--step", "check"],
+                [sys.executable, "-m", f"{__package__}.run_from_config", "--config", str(master_config_path), "--step", "check"],
                 check=True,
-                cwd=str(pipeline_dir),
+                cwd=str(pipeline_dir.parent),
             )
 
     commands: List[List[str]] = []
@@ -781,7 +781,8 @@ def main(argv=None) -> None:
 
         commands.append([
             sys.executable,
-            str(pipeline_dir / "run_from_config.py"),
+            "-m",
+            f"{__package__}.run_from_config",
             "--config",
             str(child_config_path),
             "--step",
@@ -851,7 +852,7 @@ def main(argv=None) -> None:
         print("Dry run only; no split runs launched.")
         return
 
-    _launch_commands(commands, max_parallel=max(1, args.jobs), cwd=pipeline_dir)
+    _launch_commands(commands, max_parallel=max(1, args.jobs), cwd=pipeline_dir.parent)
     merged_dir = _merge_split_outputs(
         master_cfg=raw_cfg,
         master_config_path=master_config_path,
@@ -862,7 +863,7 @@ def main(argv=None) -> None:
     print(f"Merged outputs written to: {merged_dir}")
 
     if raw_cfg.get("observation_model") is not None:
-        from configured_observation_model import run_configured_observation_model
+        from .configured_observation_model import run_configured_observation_model
         report = run_configured_observation_model(merged_dir.parent, raw_cfg)
         if report is not None:
             print(f"Observation-model outputs written to: {report['scenario_dir']}")

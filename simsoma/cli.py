@@ -16,25 +16,24 @@ import os
 import sys
 from pathlib import Path
 
-import simsoma
+from . import __version__
 
 
 def _versions() -> dict:
-    out = {"simsoma": simsoma.__version__}
+    out = {"simsoma": __version__}
     try:
         import plantsoma_obs
         out["plantsoma_obs"] = plantsoma_obs.__version__
     except ImportError:
         out["plantsoma_obs"] = None
-    out["core_path"] = str(simsoma.core_path())
+    out["package_path"] = str(Path(__file__).resolve().parent)
     return out
 
 
 def main(argv=None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     if argv[:1] == ["topology-from-tls"]:          # own argument parser (incl. --help)
-        simsoma.use_core()
-        import topology_tls
+        from . import topology_tls
         try:
             return int(topology_tls.main(argv[1:]))
         except ValueError as exc:
@@ -63,16 +62,15 @@ def main(argv=None) -> int:
     sub.add_parser("version", help="print versions")
     a = ap.parse_args(argv)
 
-    simsoma.use_core()
     os.environ.setdefault("SIMSOMA_SKIP_TOPOLOGY_CONFIRM", "1")
     try:
         if a.cmd == "version":
             print(json.dumps(_versions(), indent=2)); return 0
         if a.cmd == "template":
-            import layered
+            from . import layered
             print(json.dumps(layered.LAYERED_CONFIG_TEMPLATE, indent=2)); return 0
         if a.cmd == "topology-from-csv":
-            import topology_csv
+            from . import topology_csv
             args = ["--branches", str(a.branches_csv), "--organs", str(a.organs_csv),
                     "--out", str(a.out_json), "--unit", a.unit]
             if a.report:
@@ -81,14 +79,14 @@ def main(argv=None) -> int:
         if not a.config.exists():
             print(f"simsoma: config not found: {a.config}", file=sys.stderr); return 2
         if a.cmd == "layers":
-            import layered
+            from . import layered
             res = layered.run_layered_config(a.config)
             print(f"wrote {len(res['files'])} files to {res['output_dir']}"); return 0
-        import run_from_config
+        from . import run_from_config
         if a.cmd == "check":
             run_from_config.main(["--config", str(a.config), "--step", "check"]); return 0
         if a.splits > 1:
-            import launch_grid_splits
+            from . import launch_grid_splits
             args = ["--master-config", str(a.config), "--n-splits", str(a.splits), "--jobs", str(a.jobs),
                     "--split-axis", a.split_axis]
             if a.skip_check:

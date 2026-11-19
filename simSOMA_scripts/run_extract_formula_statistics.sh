@@ -42,8 +42,8 @@ fi
 RESULT_DIR="$1"
 
 CMD=(
-  "$PYTHON_BIN"
-  "$PROJECT_ROOT/simSOMA_corefunc/extract_formula_statistics.py"
+  env "PYTHONPATH=$PROJECT_ROOT${PYTHONPATH:+:$PYTHONPATH}"
+  "$PYTHON_BIN" -m simsoma.extract_formula_statistics
   --result-dir "$RESULT_DIR"
   --target "$TARGET"
   --low-threshold "$LOW_THRESHOLD"

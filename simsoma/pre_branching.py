@@ -9,8 +9,8 @@ from typing import Optional, Sequence, Tuple, List
 
 import numpy as np
 
-from self_renewal import CellState, SelfRenewalParams, Time2D
-from recruitment_utils import allocate_equalized_quotas, expand_founders_to_exact_leaves
+from .self_renewal import CellState, SelfRenewalParams, Time2D
+from .recruitment_utils import allocate_equalized_quotas, expand_founders_to_exact_leaves
 
 
 @dataclass(frozen=True)

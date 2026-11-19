@@ -16,8 +16,8 @@ import sys
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
 
-import summaries
-import topology_io
+from . import summaries
+from . import topology_io
 
 BIAS_FIELDS = [
     "bias_mode",
@@ -145,13 +145,13 @@ def _project_root_from_context(*, base_dir: Path) -> Path:
         return Path(env_home).expanduser().resolve()
 
     # Standard package layout: config files are in simSOMA_configs/.
-    if base_dir.name == "simSOMA_configs" and (base_dir.parent / "simSOMA_corefunc").exists():
+    if base_dir.name == "simSOMA_configs" and (base_dir.parent / "simsoma").is_dir():
         return base_dir.parent.resolve()
 
     # Split configs are written below simSOMA_output/<experiment>/grid_splits/subconfigs/.
     # Walk upward until the project root is found.
     for parent in [base_dir, *base_dir.parents]:
-        if (parent / "simSOMA_corefunc").exists() and (parent / "simSOMA_configs").exists():
+        if (parent / "simsoma").is_dir() and (parent / "simSOMA_configs").exists():
             return parent.resolve()
 
     # Last-resort fallback keeps legacy behavior predictable.
@@ -223,11 +223,8 @@ def _software_version_info(pipeline_dir: Path) -> Dict[str, Any]:
     version_file = project_root / "VERSION"
     version = version_file.read_text(encoding="utf-8").strip() if version_file.exists() else "unversioned"
     if version == "unversioned":   # installed package: no VERSION file next to the modules
-        try:
-            import simsoma
-            version = f"simSOMA-v{simsoma.__version__}"
-        except ImportError:
-            pass
+        from . import __version__ as _simsoma_version
+        version = f"simSOMA-v{_simsoma_version}"
     tracked = [
         "run_from_config.py",
         "pipeline_wrapper.py",
@@ -1141,7 +1138,7 @@ def _materialize_tls_topology(cfg: Dict[str, Any], *, config_path: Path) -> None
     if not isinstance(prune, bool):
         raise ValueError("topology.topology_tls.prune must be true or false.")
 
-    import topology_tls
+    from . import topology_tls
     rows = topology_tls.read_segment_table(seg_path)
     topo, report = topology_tls.convert(rows, organs=organs, min_axis_length=min_len, prune=prune,
                                         seed=seed, source_name=seg_path.name)
@@ -1215,7 +1212,7 @@ def _validate_config(cfg: Dict[str, Any]) -> None:
 
     observation_model = cfg.get("observation_model")
     if observation_model is not None:
-        from configured_observation_model import normalize_observation_model_config
+        from .configured_observation_model import normalize_observation_model_config
         normalize_observation_model_config(observation_model)
 
     mode = str(cfg["simulation_mode"]).lower()
@@ -1327,6 +1324,16 @@ def _param_id(params: Dict[str, Any]) -> str:
 
 
 
+def _module_command(name: str) -> List[str]:
+    """Command that runs a simSOMA module as a script (``python -m simsoma.<name>``)."""
+    return [sys.executable, "-m", f"{__package__}.{name}"]
+
+
+def _module_cwd(pipeline_dir: Path) -> str:
+    """Working directory for module sub-processes: the folder that contains the ``simsoma`` package."""
+    return str(pipeline_dir.parent)
+
+
 def _build_run_command(
     *,
     cfg: Dict[str, Any],
@@ -1338,8 +1345,7 @@ def _build_run_command(
     seed: int,
 ) -> List[str]:
     cmd = [
-        sys.executable,
-        str(pipeline_dir / "pipeline_wrapper.py"),
+        *_module_command("pipeline_wrapper"),
         "--topology_json", str(topology_json),
         "--out_json", str(result_json),
         "--topology_unit", "steps",
@@ -1395,8 +1401,7 @@ def _build_check_commands(
     topology_png = check_dir / "topology_phylogram_original_units.png"
 
     inspect_cmd = [
-        sys.executable,
-        str(pipeline_dir / "inspect_topology.py"),
+        *_module_command("inspect_topology"),
         "--topology_json", str(topology_json),
         "--topology_unit", str(cfg["mapping_unit"]),
         "--topology_mapping_mode", str(cfg["mapping_mode"]),
@@ -1435,8 +1440,7 @@ def _run_topology_plot(
     report_json = check_dir / f"{out_name}_report.json"
 
     cmd = [
-        sys.executable,
-        str(plotter),
+        *_module_command("plot_topology_json"),
         "--topology_json", str(topology_json),
         "--outdir", str(check_dir),
         "--out_name", out_name,
@@ -1464,7 +1468,7 @@ def _run_topology_plot(
     if bool(plot_cfg.get("show_tip_labels", False)):
         cmd.append("--show_tip_labels")
 
-    subprocess.run(cmd, check=True, cwd=str(pipeline_dir))
+    subprocess.run(cmd, check=True, cwd=_module_cwd(pipeline_dir))
 
     if not bool(plot_cfg.get("write_pdf", DEFAULT_TOPOLOGY_PLOT["write_pdf"])) and topology_pdf.exists():
         topology_pdf.unlink()
@@ -1500,7 +1504,7 @@ def _run_check_step(*, cfg: Dict[str, Any], raw_cfg: Dict[str, Any], config_path
     check_dir.mkdir(parents=True, exist_ok=True)
 
     try:
-        subprocess.run(inspect_cmd, check=True, cwd=str(pipeline_dir))
+        subprocess.run(inspect_cmd, check=True, cwd=_module_cwd(pipeline_dir))
         topology_plot_outputs = _run_topology_plot(
             plot_cfg=plot_cfg,
             topology_json=topology_json,
@@ -2205,7 +2209,7 @@ def _run_grid_step(*, cfg: Dict[str, Any], raw_cfg: Dict[str, Any], config_path:
                 )
 
                 try:
-                    subprocess.run(cmd, check=True, cwd=str(pipeline_dir))
+                    subprocess.run(cmd, check=True, cwd=_module_cwd(pipeline_dir))
                 except subprocess.CalledProcessError as exc:
                     result_json.unlink(missing_ok=True)
                     raise RuntimeError(f"pipeline_wrapper.py failed for {set_id} ({set_label}), rep={rep_abs}.") from exc
@@ -2495,7 +2499,7 @@ def main(argv=None) -> None:
 
     _run_grid_step(cfg=cfg, raw_cfg=raw_cfg, config_path=config_path, pipeline_dir=pipeline_dir)
     if raw_cfg.get("observation_model") is not None:
-        from configured_observation_model import run_configured_observation_model
+        from .configured_observation_model import run_configured_observation_model
         outdir_root = _resolve_outdir_root(str(cfg["outdir_root"]), base_dir=config_path.parent)
         run_configured_observation_model(outdir_root / str(cfg["experiment_name"]), raw_cfg)
 

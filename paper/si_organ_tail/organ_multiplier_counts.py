@@ -3,8 +3,7 @@
 Run from the repository root. Output (2026-10-08): g=1: 933.94 low, 62.06 intermediate, 175.17 fixed;
 g=5: 4682.26, 74.29, 175.17."""
 import sys, numpy as np
-sys.path.insert(0,'simSOMA_corefunc')
-import topology_io, pipeline_wrapper, self_renewal
+from simsoma import topology_io, pipeline_wrapper, self_renewal  # pip install . first
 topo = topology_io.load_topology_auto(__import__("pathlib").Path("simSOMA_inputs/topologies/topology_01_multibranch_20organs_order1to5.json"),
         mapping={"unit":"years","rate":5.0,"mode":"deterministic"})
 for g in (1.0,5.0):
