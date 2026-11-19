@@ -42,7 +42,8 @@ class ClosedFormTests(unittest.TestCase):
                 e = fd.polyclonal_founding_expectation(P, C, m)
                 self.assertAlmostEqual(e["probability"], min(1.0, (P - 1) * m / C))
                 self.assertAlmostEqual(e["expected_sector_count"], 1.0 + e["probability"])
-                self.assertAlmostEqual(e["phi"], (P - 1) * m / C)
+                self.assertAlmostEqual(e["chi"], (P - 1) * m / C)
+                self.assertEqual(e["phi"], e["chi"])   # deprecated alias
 
     def test_single_precursor_is_monoclonal(self):
         self.assertEqual(fd.polyclonal_founding_expectation(1, 50, 7)["probability"], 0.0)

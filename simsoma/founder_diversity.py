@@ -25,7 +25,8 @@ Under uniform focal placement (no phyllotaxy) the expected values depend only on
 
     Pr(polyclonal) = min(1, (P_eff - 1) m / C),   E[K] = 1 + Pr(polyclonal),
 
-i.e. on the compound quantity phi = (P_eff - 1) m / C. polyclonal_founding_expectation()
+i.e. on the founder quantity chi = (P_eff - 1) m / C (written phi up to v0.2.3).
+polyclonal_founding_expectation()
 computes the exact values for any (P_eff, C, m) by enumerating focal positions.
 
 The previous definition (simSOMA <= 0.1.x) counted distinct ROOT lineage labels. Those
@@ -93,8 +94,8 @@ def summarize_founder_sectors(sampled_indices: Sequence[int], boundary_cells: in
 def polyclonal_founding_expectation(precursors_eff: int, boundary_cells: int, niche_size_m: int) -> dict:
     """Exact expectation under a uniformly placed contiguous block (no phyllotaxy).
 
-    Returns probability of polyclonal founding, expected sector count, and the compound
-    quantity phi = (P_eff - 1) m / C.
+    Returns probability of polyclonal founding, expected sector count, and the founder
+    quantity chi = (P_eff - 1) m / C (notation chi_B, chi_O; key "phi" is a deprecated alias of "chi").
     """
     P, C, m = int(precursors_eff), int(boundary_cells), int(niche_size_m)
     if P < 1 or C < 1 or m < 1 or P > C:
@@ -106,7 +107,9 @@ def polyclonal_founding_expectation(precursors_eff: int, boundary_cells: int, ni
         k = len({sector[i] for i in contiguous_block_indices(C, f, P)})
         n_poly += int(k > 1)
         k_sum += k
-    return {"probability": n_poly / C, "expected_sector_count": k_sum / C, "phi": (P - 1) * m / C}
+    chi = (P - 1) * m / C
+    return {"probability": n_poly / C, "expected_sector_count": k_sum / C, "chi": chi,
+            "phi": chi}   # "phi": deprecated alias (v0.2.x), remove in a later version
 
 
 def summarize_founder_lineages(cells: Iterable[Any], niche_size_m: int) -> dict:

@@ -322,7 +322,7 @@ def _canonical_truth_aliases(configured: Mapping[str, Any], run_config: Mapping[
     elif configured.get("organ_precursor_number") is not None:
         out["P_o"] = int(float(configured["organ_precursor_number"]))
     # Expected clonal composition of founders (local_sector_v1; exact for uniform focal
-    # placement, i.e. no phyllotaxy): phi = (P_eff - 1) m / C, pi = Pr(polyclonal founding).
+    # placement, i.e. no phyllotaxy): chi = (P_eff - 1) m / C, pi = Pr(polyclonal founding).
     try:
         from .founder_diversity import FOUNDER_DEFINITION_VERSION, polyclonal_founding_expectation
         out["founder_definition"] = FOUNDER_DEFINITION_VERSION
@@ -331,7 +331,8 @@ def _canonical_truth_aliases(configured: Mapping[str, Any], run_config: Mapping[
         for key, P in (("B", out.get("P_b_eff")), ("O", out.get("P_o"))):
             if m_i >= 1 and C_i and P and int(P) <= int(C_i):
                 e = polyclonal_founding_expectation(int(P), int(C_i), m_i)
-                out[f"phi_{key}"] = e["phi"]
+                out[f"chi_{key}"] = e["chi"]
+                out[f"phi_{key}"] = e["chi"]   # deprecated alias of chi_{key} (v0.2.x); remove later
                 out[f"pi_{key}_expected"] = e["probability"]
                 out[f"sector_count_{key}_expected"] = e["expected_sector_count"]
     except ImportError:

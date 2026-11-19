@@ -15,7 +15,7 @@ For one event, with n_i founders from sector S_i and p_i = n_i / P_eff:
 | `founder_sector_count` | K | number of sectors with n_i > 0 |
 | `founder_polyclonal` | 1(K > 1) | 1 = polyclonal, 0 = monoclonal founding |
 | `founder_effective_sectors` | N_eff | 1 / sum_i p_i^2 |
-| `founder_diversity` | d | (N_eff - 1) / (m - 1), 0 if m = 1 |
+| `founder_diversity` | | (N_eff - 1) / (m - 1), 0 if m = 1 (normalized founder diversity) |
 | `founder_dominant_fraction` | | max_i p_i |
 | `founder_sector_counts` | | {sector index: n_i}; `founder_lineage_counts` is the same (legacy key) |
 
@@ -28,14 +28,23 @@ pi_B, pi_O = mean `founder_polyclonal`; d_B, d_O = mean `founder_diversity`.
 Under uniform focal placement (no phyllotaxy) the expectations depend only on (P_eff, C, m).
 For C divisible by m and P_eff <= C/m + 1:
 
-    Pr(polyclonal) = min(1, phi),   E[K] = 1 + Pr(polyclonal),   phi = (P_eff - 1) m / C.
+    Pr(polyclonal) = min(1, chi),   E[K] = 1 + Pr(polyclonal),   chi = (P_eff - 1) m / C.
+
+Derivation: identify each of the C equally likely block positions with the first cell of the block. A block
+lies within one sector of C/m cells (monoclonal) if and only if it starts at one of the first C/m - P_eff + 1
+cells of that sector, so C - (P_eff - 1) m positions are monoclonal (none if P_eff > C/m). For
+P_eff <= C/m + 1 a block straddles at most one sector boundary, hence E[K] = 1 + Pr(polyclonal).
 
 `founder_diversity.polyclonal_founding_expectation(P_eff, C, m)` gives exact values for any
-(P_eff, C, m). Configured truth exports `phi_B`, `phi_O`, `pi_B_expected`, `pi_O_expected`,
+(P_eff, C, m). Configured truth exports `chi_B`, `chi_O`, `pi_B_expected`, `pi_O_expected`,
 `sector_count_B_expected`, `sector_count_O_expected`.
 
+The founder quantity is written chi (chi_B, chi_O) from v0.3.0, as in the paper; up to v0.2.3 it was
+called phi. The keys `phi_B`, `phi_O` (and `"phi"` in the return value of
+`polyclonal_founding_expectation`) are kept as deprecated aliases with identical values.
+
 Note: fitSOMA 0.3.19 computes `phi_B = P_a_eff * m / C` (no -1). The geometric quantity is
-(P_eff - 1) m / C; the two should be aligned.
+chi_B = (P_eff - 1) m / C; the two should be aligned.
 
 ## Detectability
 Polyclonal founding leaves a genetic signature only if the sectors involved differ genetically.

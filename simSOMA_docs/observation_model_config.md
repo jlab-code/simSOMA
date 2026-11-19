@@ -176,15 +176,18 @@ numbers. Additional options in `read_counts` configurations:
 "background": {"n_sites": 2000, "distribution": "gamma:2", "mean": 0.023}
 ```
 
-* `lognormal_site_sample` (plantsoma_obs >= 1.1.0): read depth at site i in sample (organ) s is
-  Poisson with mean D x g_i x e_is x h_s, with log-normal site, site-by-sample and sample factors
+* `lognormal_site_sample` (plantsoma_obs >= 1.1.0): read depth at site i in sample (organ) o is
+  Poisson with mean d̄ x u_i x u_io x u_o (paper notation, Supplementary Text 10.3; plantsoma_obs
+  writes mean x g_i x e_is x h_s), with log-normal site, site-by-sample and sample factors
   (`site_sdlog` 0.58, `sample_sdlog` 0.17, `sample_factor_sdlog` 0.27; means 1) fitted to candidate
   sites of the apricot fruit pseudobulk input tables (Goel et al. 2024; lowest depth cutoff, Poisson
   variance subtracted); site factors above 3 (`max_site_factor`) are removed as by a maximum-depth
-  filter. Identical draws to the vafSOMA benchmark generator v4 (simSOMA_extensions v4).
+  filter. From simSOMA 0.3.0 (plantsoma_obs 1.1.1) the sample factor u_o is drawn once per sample and
+  shared by its somatic and background sites (1.1.0 drew it twice). This is the model of the vafSOMA
+  benchmark generator v4 (same distribution, different random draws).
 * Depth tiers (vafSOMA tables, `simsoma layers`): nested filters of one read set; a site enters a
   tier only if all samples reach the cutoff, as in the apricot input tables.
-* `background`: artefact sites with the same VAF q in every sample, q ~ exp | gamma:<shape> |
+* `background`: artefact sites with the same VAF q in every sample (background VAF, notation q), q ~ exp | gamma:<shape> |
   lnorm:<sdlog> | mix:<w2>:<mean2> with the given mean (clipped at 0.45); apricot layer data
   suggest gamma, shape ~2, mean ~0.023. Background rows carry `site_class = background`.
 
