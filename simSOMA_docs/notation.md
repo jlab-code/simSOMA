@@ -66,10 +66,11 @@ mutation or site, o an organ and k a SAM layer.
 |---|---|---|
 | k_io | sampled cells of organ o carrying mutation i | `allele_counts_by_mutation` (`{i: k_io}`), `allele_count` |
 | n_o | sampled cells of organ o | `n_sampled_cells` |
-| v_io | developmental VAF k_io/n_o | `sampled_vaf`, `source_vaf` |
+| v_io | developmental VAF k_io/n_o: fraction of the sampled cells of organ o that carry mutation i | `sampled_vaf` |
+| v_io^(k) | developmental VAF of a mutation of layer k (per-layer simulation; source layer in the observation transform) | `carrier_fraction` (per-layer output), `source_vaf` (transform) |
 | deg(i) | number of sampled organs carrying mutation i (sharing degree) | `sharing_degree` |
 | N_organs | number of sampled organs | `n_organs` |
-| f | carrier fraction of a mutation; organ tail M(≥ f) = 2gμ_div(1/f − P_o) | `carrier_fraction` |
+| f | carrier fraction of a mutation among all cells of an organ (or layer); organ tail M(≥ f) = 2gμ_div(1/f − P_o) | — (sampled values: v_io, v_io^(k)) |
 | v_min | low-VAF threshold of the formula statistics (default 0.05) | `--low-threshold` |
 
 ## Observation model (plantsoma_obs)
@@ -79,6 +80,7 @@ mutation or site, o an organ and k a SAM layer.
 | a_k, a_ko | contribution of layer k (in organ o) to the sample | `layer_contributions`, `effective_layer_contribution` |
 | η | phasing factor (1 phased, 1/2 unphased) | `phase`, `phase_factor` |
 | ṽ_io | assay (expected observed) VAF | `assay_vaf`, `observed_vaf` (exact transform) |
+| φ_k | expected assay VAF of a mutation fixed in layer k, η a_k | `expected_fixed_observed_vaf` |
 | d̄ | mean read depth | `depth.mean` / `depth.value` |
 | d_io | read depth | `depth`, `DP` |
 | u_i, u_io, u_o | site, site-by-organ and organ depth factors | `site_sdlog`, `sample_sdlog`, `sample_factor_sdlog` |
