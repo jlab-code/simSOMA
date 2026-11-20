@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.3.0 — 2026-11-19 (release cited in the paper)
+## 0.3.0 — 2026-11-20 (release cited in the paper)
 
 Simulated values change for a given seed (seed fix, below); the model is unchanged.
 

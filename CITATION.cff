@@ -5,8 +5,8 @@ authors:
   - family-names: "Johannes"
     given-names: "Frank"
 version: "0.3.0"
-date-released: 2026-11-19
-doi: "10.5281/zenodo.23274014"
+date-released: 2026-11-20
+doi: "10.5281/zenodo.24387363"
 url: "https://github.com/jlab-code/simSOMA"
 repository-code: "https://github.com/jlab-code/simSOMA"
 license: "MIT"

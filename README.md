@@ -1,6 +1,6 @@
 # simSOMA
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.23274014.svg)](https://doi.org/10.5281/zenodo.23274014)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.24387363.svg)](https://doi.org/10.5281/zenodo.24387363)
 
 **simSOMA** is a cell-lineage based simulator of somatic variant allele-frequency (VAF) spectra in plants. It models how shoot apical meristem dynamics, cell-lineage turnover, branch founding, organ formation and plant topology jointly shape observed VAF spectra and variant sharing across sampled organs.
 
@@ -201,7 +201,8 @@ https://github.com/jlab-code/simSOMA-tutorial
 ## Citation
 
 If you use simSOMA, please cite the accompanying paper and the software archive on Zenodo
-(doi:[10.5281/zenodo.23274014](https://doi.org/10.5281/zenodo.23274014); the record lists all versions).
+(version 0.3.0: doi:[10.5281/zenodo.24387363](https://doi.org/10.5281/zenodo.24387363); version 0.2.3:
+doi:[10.5281/zenodo.23274014](https://doi.org/10.5281/zenodo.23274014); each record lists all versions).
 Citation metadata are provided in `CITATION.cff`.
 
 ## License
